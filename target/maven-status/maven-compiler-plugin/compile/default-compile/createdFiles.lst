@@ -1,6 +1,12 @@
-com\example\helloendpoints\Irkit.class
-com\example\helloendpoints\Constants.class
-com\example\helloendpoints\PostGreeting.class
+com\example\helloendpoints\postdata\PostUserData.class
+com\example\helloendpoints\entity\ScheduleData.class
+com\example\helloendpoints\entity\TemperatureData.class
+com\example\helloendpoints\postdata\PostScheduleData.class
 com\example\helloendpoints\OfyHelper.class
-com\example\helloendpoints\Greetings.class
-com\example\helloendpoints\Greeting.class
+com\example\helloendpoints\entity\Irkit.class
+com\example\helloendpoints\entity\UserData.class
+com\example\helloendpoints\Constants.class
+com\example\helloendpoints\postdata\PostSignalData.class
+com\example\helloendpoints\postdata\PostTemperatureData.class
+com\example\helloendpoints\api\IRkitRestAPI.class
+com\example\helloendpoints\entity\SignalData.class
