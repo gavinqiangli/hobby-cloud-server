@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queue-entries>
+	<queue>
+		<name>default</name>
+		<rate>1/s</rate>
+	</queue>
+	<queue>
+		<name>fastqueue</name>
+		<rate>10/s</rate>
+		<bucket-size>40</bucket-size>
+		<max-concurrent-requests>1000</max-concurrent-requests>
+		<retry-parameters>
+			<task-retry-limit>7</task-retry-limit>
+			<task-age-limit>1h</task-age-limit>
+		</retry-parameters>
+	</queue>
+</queue-entries>

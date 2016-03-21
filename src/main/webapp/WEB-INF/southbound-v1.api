@@ -1,0 +1,245 @@
+{
+  "extends" : "thirdParty.api",
+  "abstract" : false,
+  "root" : "https://irkitrestapi.appspot.com/_ah/api",
+  "name" : "southbound",
+  "version" : "v1",
+  "defaultVersion" : false,
+  "adapter" : {
+    "bns" : "https://irkitrestapi.appspot.com/_ah/spi",
+    "deadline" : 65.0,
+    "type" : "lily"
+  },
+  "auth" : {
+    "allowCookieAuth" : false
+  },
+  "frontendLimits" : {
+    "unregisteredUserQps" : -1,
+    "unregisteredQps" : -1,
+    "unregisteredDaily" : -1,
+    "rules" : [ ]
+  },
+  "cacheControl" : {
+    "type" : "no-cache",
+    "maxAge" : 0
+  },
+  "methods" : {
+    "southbound.iRkitSouthboundRestAPI.getMessages" : {
+      "path" : "messages",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.getMessages",
+      "request" : {
+        "parameters" : {
+          "devicekey" : {
+            "type" : "string",
+            "required" : true
+          },
+          "newer_than" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "southbound.iRkitSouthboundRestAPI.postDoor" : {
+      "path" : "door",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postDoor",
+      "request" : {
+        "parameters" : {
+          "devicekey" : {
+            "type" : "string",
+            "required" : true
+          },
+          "hostname" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "southbound.iRkitSouthboundRestAPI.postMessages" : {
+      "path" : "messages",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postMessages",
+      "request" : {
+        "parameters" : {
+          "devicekey" : {
+            "type" : "string",
+            "required" : true
+          },
+          "freq" : {
+            "type" : "float",
+            "required" : true
+          },
+          "body" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "southbound.iRkitSouthboundRestAPI.postKeys" : {
+      "path" : "keys",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postKeys",
+      "request" : {
+        "parameters" : {
+          "devicekey" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "southbound.temperature.post" : {
+      "path" : "posttemperature/{post_id}",
+      "httpMethod" : "post",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperatureData",
+      "request" : {
+        "parameters" : {
+          "post_id" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    }
+  },
+  "descriptor" : {
+    "schemas" : {
+      "GetMessagesResponse" : {
+        "id" : "GetMessagesResponse",
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostDoorResponse" : {
+        "id" : "PostDoorResponse",
+        "type" : "object",
+        "properties" : {
+        }
+      },
+      "PostMessagesResponse" : {
+        "id" : "PostMessagesResponse",
+        "type" : "object",
+        "properties" : {
+        }
+      },
+      "PostKeysResponse" : {
+        "id" : "PostKeysResponse",
+        "type" : "object",
+        "properties" : {
+          "clienttoken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostTemperature" : {
+        "id" : "PostTemperature",
+        "type" : "object",
+        "properties" : {
+          "irkit_id" : {
+            "type" : "string"
+          },
+          "signal_name" : {
+            "type" : "string"
+          },
+          "signal_content" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "methods" : {
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.getMessages" : {
+        "request" : {
+          "$ref" : "GetMessagesResponse"
+        },
+        "response" : {
+          "$ref" : "GetMessagesResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postDoor" : {
+        "request" : {
+          "$ref" : "PostDoorResponse"
+        },
+        "response" : {
+          "$ref" : "PostDoorResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postMessages" : {
+        "request" : {
+          "$ref" : "PostMessagesResponse"
+        },
+        "response" : {
+          "$ref" : "PostMessagesResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postKeys" : {
+        "request" : {
+          "$ref" : "PostKeysResponse"
+        },
+        "response" : {
+          "$ref" : "PostKeysResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperatureData" : {
+        "request" : {
+          "$ref" : "PostTemperature"
+        },
+        "response" : {
+          "$ref" : "PostTemperature"
+        }
+      }
+    }
+  }
+}

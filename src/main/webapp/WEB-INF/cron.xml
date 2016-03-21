@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/cachescheduler</url>
+    <description>Clean the cache every 30 minutes</description>
+    <schedule>every 30 minutes</schedule>
+    <timezone>Europe/Stockholm</timezone>
+  </cron>
+  <cron>
+    <url>/signalscheduler</url>
+    <description>Send scheduled signal commands</description>
+    <schedule>every 30 minutes</schedule>
+    <timezone>Europe/Stockholm</timezone>
+    <retry-parameters>
+      <min-backoff-seconds>2.5</min-backoff-seconds>
+      <max-doublings>5</max-doublings>
+    </retry-parameters>
+  </cron>
+</cronentries>

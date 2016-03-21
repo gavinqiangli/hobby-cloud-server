@@ -1,9 +1,11 @@
 package com.example.helloendpoints;
+import com.example.helloendpoints.entity.Device;
 import com.example.helloendpoints.entity.Irkit;
-import com.example.helloendpoints.entity.ScheduleData;
-import com.example.helloendpoints.entity.SignalData;
-import com.example.helloendpoints.entity.TemperatureData;
-import com.example.helloendpoints.entity.UserData;
+import com.example.helloendpoints.entity.Message;
+import com.example.helloendpoints.entity.MyUser;
+import com.example.helloendpoints.entity.Schedule;
+import com.example.helloendpoints.entity.Signal;
+import com.example.helloendpoints.entity.Temperature;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
@@ -20,10 +22,13 @@ public class OfyHelper implements ServletContextListener {
     // This will be invoked as part of a warmup request, or the first user request if no warmup
     // request.
     ObjectifyService.register(Irkit.class);
-    ObjectifyService.register(ScheduleData.class);
-    ObjectifyService.register(SignalData.class);
-    ObjectifyService.register(TemperatureData.class);
-    ObjectifyService.register(UserData.class);
+    ObjectifyService.register(Schedule.class);
+    ObjectifyService.register(Signal.class);
+    ObjectifyService.register(Temperature.class);
+    ObjectifyService.register(MyUser.class);
+    ObjectifyService.register(Message.class);
+    ObjectifyService.register(Device.class);
+
 
   }
 

@@ -4,7 +4,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.example.helloendpoints.api.IRkitRestAPI</param-value>
+            <param-value>com.example.helloendpoints.api.IRkitNorthBoundRestAPI,com.example.helloendpoints.api.IRkitSouthboundRestAPI</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -14,7 +14,59 @@
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
+    	
+	<servlet>
+		<servlet-name>guestbook</servlet-name>
+		<servlet-class>com.example.helloendpoints.guestbook.GuestbookServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>guestbook</servlet-name>
+		<url-pattern>/guestbook</url-pattern>
+	</servlet-mapping>
+	<welcome-file-list>
+		<welcome-file>guestbook.jsp</welcome-file>
+	</welcome-file-list>
+	
+	<servlet>
+		<servlet-name>signalscheduler</servlet-name>
+		<servlet-class>com.example.helloendpoints.scheduler.SignalScheduler</servlet-class>
+	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>signalscheduler</servlet-name>
+		<url-pattern>/signalscheduler</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>signalsender</servlet-name>
+        <servlet-class>com.example.helloendpoints.scheduler.SignalSender</servlet-class>
+    </servlet>
+  
+    <servlet-mapping>
+        <servlet-name>signalsender</servlet-name>
+        <url-pattern>/signalsender</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+		<servlet-name>cachescheduler</servlet-name>
+		<servlet-class>com.example.helloendpoints.scheduler.CacheScheduler</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>cachescheduler</servlet-name>
+		<url-pattern>/cachescheduler</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>cachecleaner</servlet-name>
+        <servlet-class>com.example.helloendpoints.scheduler.CacheCleaner</servlet-class>
+    </servlet>
+  
+    <servlet-mapping>
+        <servlet-name>cachecleaner</servlet-name>
+        <url-pattern>/cachecleaner</url-pattern>
+    </servlet-mapping>
+  
 	<filter>
 		<filter-name>ObjectifyFilter</filter-name>
 		<filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
@@ -26,5 +78,6 @@
 	<listener>
 		<listener-class>com.example.helloendpoints.OfyHelper</listener-class>
 	</listener>
+
 
 </web-app>
