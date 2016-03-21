@@ -325,7 +325,7 @@ public class IRkitSouthboundRestAPI {
 		// begin data store
 		Temperature temperatureData;
 
-		temperatureData = new Temperature("", postTemperatureData.irkit_id, postTemperatureData.signal_name,
+		temperatureData = new Temperature(null, postTemperatureData.irkit_id, postTemperatureData.signal_name,
 				postTemperatureData.signal_content);
 
 		// Use Objectify to save the greeting and now() is used to make the call

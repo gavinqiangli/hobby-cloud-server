@@ -29,13 +29,24 @@ public class Schedule {
 	@Id
 	public Long id;
 
+	@Index
 	public String client_key;
+	
+	@Index
 	public Long device_id;
+	
+	@Index
 	public Long signal_id;
+	
+	@Index
 	public String repeat = "daily";	// now only handle "daily"
 									// later on, should support "never"
 									// later on, should support like iOS: "every monday", "every tuesday", .... "every sunday"
+	
+	@Index
 	public int hour_of_day;	// 0-23
+	
+	@Index
 	public int minute;		// 0 - 59
 	
 	@Index

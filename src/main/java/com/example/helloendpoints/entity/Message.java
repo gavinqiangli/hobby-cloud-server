@@ -35,10 +35,17 @@ public class Message {
 	@Id
 	public Long id;
 
+	@Index
 	public String client_key;
+	
+	@Index
 	public Long device_id;
+	
 	public String transparent_message;	// "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
+	
+	@Index
 	public Long signal_id;
+	
 	@Index
 	public Date date;
 

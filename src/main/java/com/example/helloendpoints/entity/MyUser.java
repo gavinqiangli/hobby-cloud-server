@@ -29,10 +29,18 @@ public class MyUser {
 	@Id
 	public Long id;
 
+	@Index
 	public String name;	// name is also the email address?
+	
 	public String passwd;
+	
+	@Index
 	public String client_key;	// unique identify a user
+	
+	@Index
 	public String api_key;
+	
+	@Index
 	public String email;
 
 	@Index

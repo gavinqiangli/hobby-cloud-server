@@ -34,11 +34,14 @@ public class Signal {
 	@Id
 	public Long id;
 
+	@Index
 	public String name;
+	
 	public String format;
 	public double freq;
 	public int[] data;
 	
+	@Index
 	public String client_key;	// in order to filter signals for a particular user
 	
 	@Index

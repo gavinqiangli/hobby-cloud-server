@@ -29,8 +29,13 @@ public class Device {
 	@Id
 	public Long id;
 
+	@Index
 	public String hostname;
+	
+	@Index
 	public String device_key;
+	
+	@Index
 	public String client_key;	// unique identify a user, who owns the device
 
 	@Index

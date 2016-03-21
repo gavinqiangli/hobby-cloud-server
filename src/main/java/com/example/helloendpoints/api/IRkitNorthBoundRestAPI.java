@@ -199,7 +199,7 @@ public class IRkitNorthBoundRestAPI {
 										// user, and then return to server and
 										// saved into server database
 
-			Signal signalData = new Signal("", signal_name, format, freq, data, clientkey);
+			Signal signalData = new Signal(null, signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the
 			// call
@@ -337,7 +337,7 @@ public class IRkitNorthBoundRestAPI {
 
 			String signal_name = "";	// real name shall be given by end user, and then return to server and saved into server database			
 			
-			signalData = new Signal("", signal_name, format, freq, data, clientkey);
+			signalData = new Signal(null, signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
@@ -451,7 +451,7 @@ public class IRkitNorthBoundRestAPI {
 		// convert string id to long id
 		Long ldeviceid = Long.valueOf(deviceid);
 
-		newMessage = new Message("", clientkey, ldeviceid, message, -1L);
+		newMessage = new Message(null, clientkey, ldeviceid, message, -1L);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -556,7 +556,7 @@ public class IRkitNorthBoundRestAPI {
         transparent_message = jsonObj.toString();
         
 		// 2.3 now store the message on server data store
-		messageData = new Message("", clientkey, ldeviceid, transparent_message, lsignalid);	
+		messageData = new Message(null, clientkey, ldeviceid, transparent_message, lsignalid);	
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -662,7 +662,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		Signal signalData;
 
-		signalData = new Signal("", postSignalData.name, postSignalData.format, postSignalData.freq, postSignalData.data, postSignalData.client_key);
+		signalData = new Signal(null, postSignalData.name, postSignalData.format, postSignalData.freq, postSignalData.data, postSignalData.client_key);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -766,7 +766,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		Temperature temperatureData;
 
-		temperatureData = new Temperature("", postTemperatureData.irkit_id, postTemperatureData.signal_name, postTemperatureData.signal_content);
+		temperatureData = new Temperature(null, postTemperatureData.irkit_id, postTemperatureData.signal_name, postTemperatureData.signal_content);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -817,7 +817,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		Schedule scheduleData;
 
-		scheduleData = new Schedule("", postScheduleData.client_key, postScheduleData.device_id, postScheduleData.signal_id, postScheduleData.repeat, postScheduleData.hour_of_day, postScheduleData.minute);
+		scheduleData = new Schedule(null, postScheduleData.client_key, postScheduleData.device_id, postScheduleData.signal_id, postScheduleData.repeat, postScheduleData.hour_of_day, postScheduleData.minute);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -871,7 +871,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		MyUser userData;
 
-		userData = new MyUser("", postUserData.name, postUserData.passwd, postUserData.client_key, postUserData.api_key, postUserData.email);
+		userData = new MyUser(null, postUserData.name, postUserData.passwd, postUserData.client_key, postUserData.api_key, postUserData.email);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -944,7 +944,7 @@ public class IRkitNorthBoundRestAPI {
 			Key<Device> newkey = ObjectifyService.factory().allocateId(Device.class); // generate new unique key here, use data store key generator to avoid collision
 			devicekey = String.valueOf(newkey.getId());
 
-			Device device = new Device("", hostname, devicekey, clientkey);
+			Device device = new Device(null, hostname, devicekey, clientkey);
 			ObjectifyService.ofy().save().entity(device).now();
 						
 		} catch (IndexOutOfBoundsException e) {
@@ -1012,38 +1012,50 @@ public class IRkitNorthBoundRestAPI {
 	 * user.getEmail() will return "pipoop@gmail.com", here using openID and oAuth for authentication of users
 	 */
 	@ApiMethod(name = "user.authed", path = "user/authed")
-	public PostUser authedUser(User user) throws NotFoundException {
+	public PostUser authedUser(User user) {
+		
+		// When you declare a parameter of type User in your API method as shown
+		// in the snippet above, the API backend framework automatically
+		// authenticates the user and enforces the authorized clientIds
+		// whitelist, ultimately by supplying the valid User or not. If the
+		// request coming in from the client has a valid auth token or is in the
+		// list of authorized clientIDs, the backend framework supplies a valid
+		// User to the parameter. If the incoming request does not have a valid
+		// auth token or if the client is not on the clientIDs whitelist, the
+		// framework sets User to null. Your own code must handle both the case
+		// where User is null and the case where there is a valid User. If there
+		// is no User, for example, you could choose to return a
+		// not-authenticated error or perform some other desired action.
+		if (user == null) {
+			return null;
+		}
 		
 		MyUser userData;
-
-		// first, check if the email has been registered into cloud data store, register new user if the email is not registered in the cloud server
-		if (ObjectifyService.ofy().load().type(MyUser.class).filter("email", user.getEmail()).list().isEmpty()) {
+		
+		// load the user data
+		userData = ObjectifyService.ofy().load().type(MyUser.class).filter("email", user.getEmail()).first().now();
+			
+		if (userData == null){
+			// if the email has NOT been registered into cloud data store, register new user in the cloud server
+			
 			// begin data store
 			String passwd = "";
 			Key<MyUser> newkey1 = ObjectifyService.factory().allocateId(MyUser.class); // generate new unique key here, use data store key generator to avoid collision
 			String client_key = String.valueOf(newkey1.getId());
 			Key<MyUser> newkey2 = ObjectifyService.factory().allocateId(MyUser.class); // generate new unique key here, use data store key generator to avoid collision
 			String api_key = String.valueOf(newkey2.getId());
-
-			userData = new MyUser("", user.getNickname(), passwd, client_key, api_key, user.getEmail());
+			userData = new MyUser(null, user.getNickname(), passwd, client_key, api_key, user.getEmail());
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
-			// will immediately get a new page using redirect and we want the data
-			// to be present.
+			// will immediately get a new page using redirect and we want the data to be present.
 			ObjectifyService.ofy().save().entity(userData).now();
 			// end data store
-		}
-		
-		// then load the user data
-		try {
-			userData = ObjectifyService.ofy().load().type(MyUser.class).filter("email", user.getEmail()).first().now();
-			PostUser postUserData = new PostUser(userData.id, userData.name, userData.passwd, userData.client_key, userData.api_key, userData.email);
-			// this method only has success response
-			return postUserData;
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an email: " + user.getEmail());
 		}					
+		
+		// this method only has success response
+		PostUser postUserData = new PostUser(userData.id, userData.name, userData.passwd, userData.client_key, userData.api_key, userData.email);
+		return postUserData;
 	}
 	
 	/**

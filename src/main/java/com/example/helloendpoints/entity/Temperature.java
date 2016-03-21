@@ -29,9 +29,15 @@ public class Temperature {
 	@Id
 	public Long id;
 
+	@Index
 	public String irkit_id;
+	
+	@Index
 	public String signal_name;
+	
+	@Index
 	public String signal_content;
+	
 	@Index
 	public Date date;
 
