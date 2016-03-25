@@ -2,6 +2,7 @@ package com.example.helloendpoints.api;
 
 import com.example.helloendpoints.Constants;
 import com.example.helloendpoints.entity.Device;
+import com.example.helloendpoints.entity.Irkit;
 import com.example.helloendpoints.entity.Message;
 import com.example.helloendpoints.entity.MyUser;
 import com.example.helloendpoints.entity.Schedule;
@@ -22,6 +23,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.inject.Named;
 
@@ -47,6 +49,7 @@ public class IRkitNorthBoundRestAPI {
 	public static ArrayList<PostUser> postUserList = new ArrayList<PostUser>();
 	public static ArrayList<PostMessage> postMessageList = new ArrayList<PostMessage>();
 
+	private static final Logger log = Logger.getLogger(IRkitNorthBoundRestAPI.class.getName());
 
 	/**
 	 * Door API For testing whether IRkit WiFi setup is ready and IRKit is connected 
@@ -83,6 +86,11 @@ public class IRkitNorthBoundRestAPI {
 	 *
 	 * @POST("/1/door")
 	 * void postDoor(@FieldMap Map<String, String> params, Callback<PostDoorResponse> callback);
+	 * 
+	 * Testing Passed OK
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/door?clientkey=8010001&deviceid=5649391675244544
+	 * Returned 200OK Response
+	 * { "hostname": "IRKitXXXX",}
 	 */
 	class PostDoorResponse {
         /*
@@ -91,7 +99,7 @@ public class IRkitNorthBoundRestAPI {
         public String hostname;
     }
 	@ApiMethod(path="door")
-	public PostDoorResponse postDoor(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, PostDoorResponse postDoorResponse) throws NotFoundException {
+	public PostDoorResponse postDoor(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid) throws NotFoundException {
 		
 		// shall we authenticate client_key here? shall we authenticate
 		// client_key for every API call?
@@ -110,7 +118,8 @@ public class IRkitNorthBoundRestAPI {
 		// if device hasn't done bonjour and hasn't done the southbound API "postDoor" to register its hostname, the hostname field in data store will be empty
 		// if device has done bonjour and has done the southbound API "postDoor" to register its hostname, the hostname field in data store shall be real hostname
 		try {
-			Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();
+			Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();	// note: id() or filter() won't work in case of there is ancestor key
+			PostDoorResponse postDoorResponse = new PostDoorResponse();
 			postDoorResponse.hostname = device.hostname;
 			// this method only has success response
 			return postDoorResponse;
@@ -141,10 +150,10 @@ public class IRkitNorthBoundRestAPI {
 		
 		// first, get the user instance, either from an existing user list, or
 		// create new user into the user list if not existing
-		PostUser postuser = null;
+		PostUser postuser;
 		int index = -1;
 		for (int i = 0; i < postUserList.size(); i++) {
-			if (postUserList.get(i).client_key == clientkey) {
+			if (postUserList.get(i).client_key.equals(clientkey)) {
 				index = i;
 				break;
 			}
@@ -199,7 +208,7 @@ public class IRkitNorthBoundRestAPI {
 										// user, and then return to server and
 										// saved into server database
 
-			Signal signalData = new Signal(null, signal_name, format, freq, data, clientkey);
+			Signal signalData = new Signal(signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the
 			// call
@@ -272,6 +281,11 @@ public class IRkitNorthBoundRestAPI {
 	 * message 		see 赤外線信号を表すJSONについて 
 	 * hostname 	IRKit device hostname. Add .local suffix to request IRKit Device HTTP API if client is in the same Wi-Fi network 
 	 * deviceid 	see Overview
+	 
+	 * Testing Passed OK
+	 * GET https://irkitrestapi.appspot.com/_ah/api/northbound/v1/messages?clear=1&clientkey=8010001
+	 * Returned 200OK Response
+	 * { "message": {"id": "5096363633147904", "format": "raw", "freq": 38, "data": [18031,8755,1190,1190,1190]}, "hostname": "IRKitXXXX", "deviceid": "5649391675244544",}
 	 */
 	class GetMessagesResponse {
         public PostSignal message;
@@ -282,14 +296,14 @@ public class IRkitNorthBoundRestAPI {
     // void getMessages(@QueryMap Map<String, String> params, Callback<GetMessagesResponse> callback);
 	// to do: client app need to change to json format for sending the request
 	// to do: check how the callback response works, i.e. how to callback
-	public GetMessagesResponse getMessages(@Named("clientkey") String clientkey, @Named("clear") String clear, GetMessagesResponse getMessagesResponse) throws NotFoundException {
+	public GetMessagesResponse getMessages(@Named("clientkey") String clientkey, @Named("clear") String clear) throws NotFoundException {
 
 		// first, get the user instance, either from an existing user list, or
 		// create new user into the user list if not existing
-		PostUser postuser = null;
+		PostUser postuser;
 		int index = -1;
 		for (int i = 0; i < postUserList.size(); i++) {
-			if (postUserList.get(i).client_key == clientkey) {
+			if (postUserList.get(i).client_key.equals(clientkey)) {
 				index = i;
 				break;
 			}
@@ -306,13 +320,23 @@ public class IRkitNorthBoundRestAPI {
 			postuser = postUserList.get(index);
 		}
 		
+		log.info("postUserList.size() = " + String.valueOf(postUserList.size()));
+
+		
 		// In case of initial polling request, i.e. "clear" param = 1, shall clear the buffered signal on the server
-		if (clear == "1") {
+		if (clear.equals("1")) {
 			postuser.newSignalMessage = null;
 		}
 			
 		// then, store the newly learned Signal data on Server side data base, if there is one received
 		if (postuser.newSignalMessage != null) {
+			
+			log.info("postuser.newSignalMessage.transparent_message = " + postuser.newSignalMessage.transparent_message);
+			// Note: JSON cannot parse {\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}
+			// JSON can only parse it without \
+			postuser.newSignalMessage.transparent_message = postuser.newSignalMessage.transparent_message.replace("\\", "");
+			log.info("postuser.newSignalMessage.transparent_message = " + postuser.newSignalMessage.transparent_message);
+			
 			// begin data store
 			Signal signalData;
 			
@@ -327,6 +351,7 @@ public class IRkitNorthBoundRestAPI {
 				format = jsonObj.getString("format");
 				freq = jsonObj.getDouble("freq");
 				JSONArray data_array = jsonObj.getJSONArray("data");
+				data = new int[data_array.length()];
 				for (int i=0; i < data_array.length(); i++) {
 					data[i] = data_array.getInt(i);
 				}
@@ -337,7 +362,7 @@ public class IRkitNorthBoundRestAPI {
 
 			String signal_name = "";	// real name shall be given by end user, and then return to server and saved into server database			
 			
-			signalData = new Signal(null, signal_name, format, freq, data, clientkey);
+			signalData = new Signal(signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
@@ -349,6 +374,8 @@ public class IRkitNorthBoundRestAPI {
 			// prepare for response
 			// read signal id from data store
 			// Now the id is available
+			GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
+			getMessagesResponse.message = new PostSignal();
 			getMessagesResponse.message.id = signalData.id;	// must also pass signal id to client app, in order for client app to give a signal name and pass signal name back to server data store
 			getMessagesResponse.message.format = format;
 			getMessagesResponse.message.freq = freq;
@@ -357,7 +384,7 @@ public class IRkitNorthBoundRestAPI {
 			// retrieve device_hostname from device database
 			// read from data store
 			try {
-				Device device = ObjectifyService.ofy().load().type(Device.class).id(postuser.newSignalMessage.device_id).now();
+				Device device = ObjectifyService.ofy().load().type(Device.class).id(postuser.newSignalMessage.device_id).now();	// note: id() or filter() won't work in case of there is ancestor key
 				getMessagesResponse.hostname = device.hostname;
 				// success response
 				return getMessagesResponse;
@@ -368,8 +395,7 @@ public class IRkitNorthBoundRestAPI {
 		}
 		
 		// failure response
-		getMessagesResponse = null;
-		return getMessagesResponse;
+		return null;
 	}
 	
 	
@@ -413,7 +439,7 @@ public class IRkitNorthBoundRestAPI {
 	 * params.put("clientkey", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 	 * params.put("deviceid", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 	 * params.put("message",
-	 * "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190, ]}"
+	 * "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
 	 * );
 	 *
 	 * // Send POST /1/messages 
@@ -432,9 +458,12 @@ public class IRkitNorthBoundRestAPI {
 	 * Client app send the message body. Server is transparently passing message body, from client app to the device.
 	 * Signal ID is unknown.
 	 * This method is not good for server side data mining.
+	 * 
+	 * Testing Passed OK
+	 * Input Message format should be without \, so: message={"format":"raw","freq":38,"data":[18031,8755,1190,1190,1190]}
 	 */
 	@ApiMethod(path="messages")		
-	public PostMessagesResponse postMessages(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("message") String message, PostMessagesResponse postMessagesResponse) throws NotFoundException {
+	public void postMessages(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("message") String message) throws NotFoundException {
 		
 		// 1. first authenticate the user
 		try {
@@ -451,7 +480,7 @@ public class IRkitNorthBoundRestAPI {
 		// convert string id to long id
 		Long ldeviceid = Long.valueOf(deviceid);
 
-		newMessage = new Message(null, clientkey, ldeviceid, message, -1L);
+		newMessage = new Message(clientkey, ldeviceid, message, -1L);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -471,17 +500,19 @@ public class IRkitNorthBoundRestAPI {
 		// first, get the device instance, either from an existing device list,
 		// or, create new device into the device list if not existing
 		// convert string id to long id
-		PostDevice postdevice = null;
+		PostDevice postdevice;
+		log.info("IRkitSouthboundRestAPI.postDeviceList.size() = " + String.valueOf(IRkitSouthboundRestAPI.postDeviceList.size()));
+
 		int index = -1;
 		for (int i = 0; i < IRkitSouthboundRestAPI.postDeviceList.size(); i++) {
-			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id == ldeviceid) {
+			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id.equals(ldeviceid)) {
 				index = i;
 				break;
 			}
 		}
 		if (index == -1) { // if device doesn't exist in the list
 			try {
-				Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();
+				Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();	// note: id() or filter() won't work in case of there is ancestor key
 				postdevice = new PostDevice(device.id, device.hostname, device.device_key, device.client_key);
 				IRkitSouthboundRestAPI.postDeviceList.add(postdevice);
 			} catch (IndexOutOfBoundsException e) {
@@ -492,24 +523,25 @@ public class IRkitNorthBoundRestAPI {
 		}
 
 		// 4. add the message body transparently into postdevice
-		if (postdevice != null && postmessage != null) {
-			postdevice.transparentMessageBuffer.add(postmessage);
-			// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall
-			// send the getMessages response to the device, including the
-			// post_signal
-			return postMessagesResponse;
-		}
+		postdevice.transparentMessageBuffer.add(postmessage);
+		log.info("postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
+		log.info("postmessage.seq_id = " + String.valueOf(postmessage.seq_id));
 
-		// failure response
-		postMessagesResponse = null;
-		return postMessagesResponse;
+		// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall
+		// send the getMessages response to the device, including the
+		// post_signal
+		return;
+		// failure response ????? to do: check android client implementation how to handle failure
 	}
 	
 	/** Method v2
 	 * Client app does not send the message body, instead it calls a specific signal id from server, and then server generate and send the message to the device
+	 * 
+	 * Testing Passed OK
+	 * Returned 200OK Response
 	 */
 	@ApiMethod(path="messages_v2")
-	public PostMessagesResponse postMessagesV2(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("signalid") String signalid, PostMessagesResponse postMessagesResponse) throws NotFoundException {
+	public void postMessagesV2(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("signalid") String signalid) throws NotFoundException {
 		
 		// 1. first authenticate the user
 		try {	
@@ -533,7 +565,7 @@ public class IRkitNorthBoundRestAPI {
 		// 2.1 first find the signal data
 		Signal signal;
 		try {
-			signal = ObjectifyService.ofy().load().type(Signal.class).id(lsignalid).now();
+			signal = ObjectifyService.ofy().load().type(Signal.class).id(lsignalid).now();	// note: id() or filter() won't work in case of there is ancestor key
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotFoundException("Signal not found with an signal_id: " + signalid);
 		}
@@ -556,7 +588,7 @@ public class IRkitNorthBoundRestAPI {
         transparent_message = jsonObj.toString();
         
 		// 2.3 now store the message on server data store
-		messageData = new Message(null, clientkey, ldeviceid, transparent_message, lsignalid);	
+		messageData = new Message(clientkey, ldeviceid, transparent_message, lsignalid);	
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -575,17 +607,17 @@ public class IRkitNorthBoundRestAPI {
 		
 		// 3. find the device id who is long polling to the server, from southbound getMessages request
 		// first, get the device instance, either from an existing device list, or, create new device into the device list if not existing
-		PostDevice postdevice = null;
+		PostDevice postdevice;
 		int index = -1;
 		for (int i = 0; i < IRkitSouthboundRestAPI.postDeviceList.size(); i++) {
-			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id == ldeviceid) {
+			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id.equals(ldeviceid)) {
 				index = i;
 				break;
 			}
 		}
 		if (index == -1) { // if device doesn't exist in the list
 			try {
-				Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();
+				Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();	// note: id() or filter() won't work in case of there is ancestor key
 				postdevice = new PostDevice(device.id, device.hostname, device.device_key, device.client_key);
 				IRkitSouthboundRestAPI.postDeviceList.add(postdevice);
 			} catch (IndexOutOfBoundsException e) {
@@ -596,15 +628,13 @@ public class IRkitNorthBoundRestAPI {
 		}
 
 		// 4. add the new signal command into postdevice
-		if(postdevice != null) {
-			postdevice.transparentMessageBuffer.add(postmessage);
-			// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall send the getMessages response to the device, including the post_signal
-			return postMessagesResponse;
-		}
-		
-		// failure response
-		postMessagesResponse = null;
-		return postMessagesResponse;
+		postdevice.transparentMessageBuffer.add(postmessage);
+		log.info("postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
+		log.info("postmessage.seq_id = " + String.valueOf(postmessage.seq_id));
+		// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall send the getMessages response to the device, including the post_signal
+		return;
+				
+		// failure response ????? to do: check android client implementation how to handle failure
 	}
 	
 	
@@ -623,6 +653,12 @@ public class IRkitNorthBoundRestAPI {
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 * 
+	 * Testing Passed OK
+	 */
 	@ApiMethod(path="get_all_signal")
 	public ArrayList<PostSignal> listSignalData() {
 		// read from data store
@@ -638,6 +674,9 @@ public class IRkitNorthBoundRestAPI {
 	 * list all signals for one user
 	 * @param clientkey
 	 * @return
+	 * 
+	 * Testing Passed OK
+	 * Returned 200OK response
 	 */
 	@ApiMethod(path="get_all_signal_for_one_user")
 	public ArrayList<PostSignal> listSignalPerUser(@Named("clientkey") String clientkey) {
@@ -662,7 +701,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		Signal signalData;
 
-		signalData = new Signal(null, postSignalData.name, postSignalData.format, postSignalData.freq, postSignalData.data, postSignalData.client_key);
+		signalData = new Signal(postSignalData.name, postSignalData.format, postSignalData.freq, postSignalData.data, postSignalData.client_key);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -692,13 +731,17 @@ public class IRkitNorthBoundRestAPI {
 	 * @param signalname
 	 * @return
 	 * @throws NotFoundException 
+	 * 
+	 * Testing Passed OK
+	 * Returned 200OK Response
 	 */
 	@ApiMethod(name = "signalname.post", httpMethod = "post")
 	public PostSignal insertSignalName(@Named("signalid") String signalid, @Named("signalname") String signalname) throws NotFoundException {
 		
 		// read from data store
 		try {
-			Signal signalData = ObjectifyService.ofy().load().type(Signal.class).id(signalid).now();
+			Long lsignalid = Long.valueOf(signalid);
+			Signal signalData = ObjectifyService.ofy().load().type(Signal.class).id(lsignalid).now();	// note: id() or filter() won't work in case of there is ancestor key
 			signalData.name = signalname;
 			ObjectifyService.ofy().save().entity(signalData).now();	// save the signal name into signal data store
 			PostSignal postSignalData = new PostSignal(signalData.id, signalData.name, signalData.format, signalData.freq, signalData.data, signalData.client_key);
@@ -817,7 +860,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		Schedule scheduleData;
 
-		scheduleData = new Schedule(null, postScheduleData.client_key, postScheduleData.device_id, postScheduleData.signal_id, postScheduleData.repeat, postScheduleData.hour_of_day, postScheduleData.minute);
+		scheduleData = new Schedule(postScheduleData.client_key, postScheduleData.device_id, postScheduleData.signal_id, postScheduleData.repeat, postScheduleData.hour_of_day, postScheduleData.minute);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -871,7 +914,7 @@ public class IRkitNorthBoundRestAPI {
 		// begin data store
 		MyUser userData;
 
-		userData = new MyUser(null, postUserData.name, postUserData.passwd, postUserData.client_key, postUserData.api_key, postUserData.email);
+		userData = new MyUser(postUserData.name, postUserData.passwd, postUserData.client_key, postUserData.api_key, postUserData.email);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
@@ -924,13 +967,18 @@ public class IRkitNorthBoundRestAPI {
 	 * 
 	 * @POST("/1/devices")
 	 * void postDevices(@FieldMap Map<String, String> params, Callback<PostDevicesResponse> callback);
+	 * 
+	 * Tesing Passed OK
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/devices?clientkey=4000003
+	 * Returned 200OK Json Response
+	 * { "devicekey": "3020001", "deviceid": "5649050225344512",}
 	 */
 	class PostDevicesResponse {
         public String devicekey;
         public String deviceid;
     }
 	@ApiMethod(path="devices")
-	public PostDevicesResponse postDevices(@Named("clientkey") String clientkey, PostDevicesResponse postDevicesResponse) throws NotFoundException {
+	public PostDevicesResponse postDevices(@Named("clientkey") String clientkey) throws NotFoundException {
 		
 		// devicekey is pre-generated by server, and then pushed to device, so that device will have a devicekey to communicate to server
 		String devicekey = ""; 
@@ -944,7 +992,7 @@ public class IRkitNorthBoundRestAPI {
 			Key<Device> newkey = ObjectifyService.factory().allocateId(Device.class); // generate new unique key here, use data store key generator to avoid collision
 			devicekey = String.valueOf(newkey.getId());
 
-			Device device = new Device(null, hostname, devicekey, clientkey);
+			Device device = new Device(hostname, devicekey, clientkey);
 			ObjectifyService.ofy().save().entity(device).now();
 						
 		} catch (IndexOutOfBoundsException e) {
@@ -952,6 +1000,7 @@ public class IRkitNorthBoundRestAPI {
 		}	
 		
 		// then, return the devicekey and deviceid to client app
+		PostDevicesResponse postDevicesResponse = new PostDevicesResponse();
 		postDevicesResponse.devicekey = devicekey;			
 		try {
 			Long ldeviceid = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now().id;
@@ -1010,6 +1059,8 @@ public class IRkitNorthBoundRestAPI {
 	 * @return
 	 * @throws NotFoundException
 	 * user.getEmail() will return "pipoop@gmail.com", here using openID and oAuth for authentication of users
+	 * 
+	 * Testing Passed OK
 	 */
 	@ApiMethod(name = "user.authed", path = "user/authed")
 	public PostUser authedUser(User user) {
@@ -1044,7 +1095,7 @@ public class IRkitNorthBoundRestAPI {
 			String client_key = String.valueOf(newkey1.getId());
 			Key<MyUser> newkey2 = ObjectifyService.factory().allocateId(MyUser.class); // generate new unique key here, use data store key generator to avoid collision
 			String api_key = String.valueOf(newkey2.getId());
-			userData = new MyUser(null, user.getNickname(), passwd, client_key, api_key, user.getEmail());
+			userData = new MyUser(user.getNickname(), passwd, client_key, api_key, user.getEmail());
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
@@ -1084,18 +1135,24 @@ public class IRkitNorthBoundRestAPI {
 	 * 
 	 * @POST("/1/apps") 
 	 * void postApps(@FieldMap Map<String, String> params, Callback<PostAppsResponse> callback);
+	 * 
+	 * Testing Passed OK: 
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/apps?email=pipoop%40gmail.com
+	 * Returned 200OK Json response
+	 * {"message": "7010001",}
 	 */
 	class PostAppsResponse {
         public String message;
     }
 	@ApiMethod(path="apps")
-	public PostAppsResponse postApps(@Named("email") String email, PostAppsResponse postAppsResponse) throws NotFoundException {
+	public PostAppsResponse postApps(@Named("email") String email) throws NotFoundException {
 
 		// find out the current user from data store
 		try {
 			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("email", email).first().now();
 			// response
 			// to do: need send email here
+			PostAppsResponse postAppsResponse = new PostAppsResponse();
 			postAppsResponse.message = user.api_key;
 			// this method only has success response
 			return postAppsResponse;
@@ -1129,16 +1186,21 @@ public class IRkitNorthBoundRestAPI {
 	 * @POST("/1/clients") 
 	 * void postClients(@FieldMap Map<String, String> params, Callback<PostClientsResponse> callback);
 	 * 
+	 * Testing Passed OK
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/clients?apikey=7010001
+	 * Returned 200OK Json response
+	 * { "clientkey": "4000003",}
 	 */
 	class PostClientsResponse {
         public String clientkey;
     }
 	@ApiMethod(path="clients")
-	public PostClientsResponse postClients(@Named("apikey") String apikey, PostClientsResponse postClientsResponse) throws NotFoundException {
+	public PostClientsResponse postClients(@Named("apikey") String apikey) throws NotFoundException {
 		
 		// find out the current user from data store
 		try {
 			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("api_key", apikey).first().now();
+			PostClientsResponse postClientsResponse = new PostClientsResponse();
 			postClientsResponse.clientkey = user.client_key;
 			// this method only has success response
 			return postClientsResponse;
@@ -1193,7 +1255,7 @@ public class IRkitNorthBoundRestAPI {
         public String clientkey;
     }
 	@ApiMethod(path="keys")
-	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key, PostKeysResponse postKeysResponse) throws NotFoundException {
+	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key) throws NotFoundException {
 
 		// clienttoken = devicekey here, see Southbound API "postKeys" implementation.
 		
@@ -1210,6 +1272,7 @@ public class IRkitNorthBoundRestAPI {
 		// find out the current device from data store
 		try {
 			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", clienttoken).first().now();
+			PostKeysResponse postKeysResponse = new PostKeysResponse();
 			postKeysResponse.deviceid = String.valueOf(device.id);
 			postKeysResponse.clientkey = device.client_key;		
 			// here, if clientkey and device.client_key is different, new clientkey will be applied and saved into data store => i.e. device user is changed!

@@ -24,8 +24,7 @@ import java.util.Date;
  **/
 @Entity
 public class Device {
-	@Parent
-	Key<Irkit> theIrkit;
+
 	@Id
 	public Long id;
 
@@ -51,14 +50,8 @@ public class Device {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public Device(String irkit, String hostname, String device_key, String client_key) {
+	public Device(String hostname, String device_key, String client_key) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.hostname = hostname;
 		this.device_key = device_key;

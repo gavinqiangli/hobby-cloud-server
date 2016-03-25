@@ -19,7 +19,6 @@ import com.example.helloendpoints.entity.MyUser;
 import com.example.helloendpoints.entity.Signal;
 import com.example.helloendpoints.postdata.PostDevice;
 import com.example.helloendpoints.postdata.PostMessage;
-import com.google.api.server.spi.response.NotFoundException;
 import com.googlecode.objectify.ObjectifyService;
 
 /**
@@ -131,7 +130,7 @@ public class SignalSender extends HttpServlet {
 		transparent_message = jsonObj.toString();
 
 		// 2.3 now store the message on server data store
-		messageData = new Message("", client_key, ldeviceid, transparent_message, lsignalid);
+		messageData = new Message(client_key, ldeviceid, transparent_message, lsignalid);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we

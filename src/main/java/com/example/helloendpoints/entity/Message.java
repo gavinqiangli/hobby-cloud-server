@@ -30,8 +30,7 @@ import java.util.Date;
  **/
 @Entity
 public class Message {
-	@Parent
-	Key<Irkit> theIrkit;
+
 	@Id
 	public Long id;
 
@@ -59,14 +58,8 @@ public class Message {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public Message(String irkit, String client_key, Long device_id, String transparent_message, Long signal_id) {
+	public Message(String client_key, Long device_id, String transparent_message, Long signal_id) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.client_key = client_key;
 		this.device_id = device_id;

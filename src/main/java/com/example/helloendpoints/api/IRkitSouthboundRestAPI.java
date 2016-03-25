@@ -5,6 +5,7 @@ import com.example.helloendpoints.entity.Device;
 import com.example.helloendpoints.entity.MyUser;
 import com.example.helloendpoints.entity.Temperature;
 import com.example.helloendpoints.postdata.PostDevice;
+import com.example.helloendpoints.postdata.PostMessage;
 import com.example.helloendpoints.postdata.PostTemperature;
 import com.example.helloendpoints.postdata.PostUser;
 import com.google.api.server.spi.config.Api;
@@ -13,6 +14,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.inject.Named;
 
@@ -32,6 +34,7 @@ public class IRkitSouthboundRestAPI {
 	 */
 	public static ArrayList<PostDevice> postDeviceList = new ArrayList<PostDevice>();	
 	
+	private static final Logger log = Logger.getLogger(IRkitSouthboundRestAPI.class.getName());
 
 	/** 
 	 * Door API
@@ -64,11 +67,15 @@ public class IRkitSouthboundRestAPI {
 	 * case 408: 
 	 * case 503: // heroku responds with 503 if longer than 30sec default:  // retry again on next loop 
 	 * }
+	 * 
+	 * Testing Passed OK
+	 * POST https://irkitrestapi.appspot.com/_ah/api/southbound/v1/door?devicekey=3020001&hostname=IRKitXXXX
+	 * Returned 204 OK Response
 	 */
 	class PostDoorResponse {
     }
 	@ApiMethod(path="door")
-	public PostDoorResponse postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname, PostDoorResponse postDoorResponse) throws NotFoundException {
+	public void postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname) throws NotFoundException {
 		
 		// first find out the device from data store
 		try {
@@ -77,7 +84,7 @@ public class IRkitSouthboundRestAPI {
 			device.hostname = hostname;
 			ObjectifyService.ofy().save().entity(device).now();	
 			
-			return postDoorResponse;
+			return;
 
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotFoundException("Device not found with an devicekey: " + devicekey);
@@ -144,21 +151,27 @@ public class IRkitSouthboundRestAPI {
 	 * (first_letter_of_key == 'd' && letter == 'a') { current_token =
 	 * IrJsonParserDataKeyData; } else if (first_letter_of_key == 'p' && letter
 	 * == 'a') { current_token = IrJsonParserDataKeyPass; }
+	 * 
+	 * Testing Passed OK
+	 * Returned 200OK Response
+	 * {"message": "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190],\"id\":1458861752741}"}
 	 */
 	class GetMessagesResponse {
         public String message;	// "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3,\"pass\":\"0123456789\"}"
         						// "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3}"
     }
 	@ApiMethod(path="messages")
-	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") int newer_than, GetMessagesResponse getMessagesResponse) throws NotFoundException {
+	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") long newer_than) throws NotFoundException {
 		
 		// get the latest message for this device_key
 		// first, get the device instance, either from an existing device list, or
 		// create new device into the device list if not existing
-		PostDevice postdevice = null;
+		PostDevice postdevice;
+		log.info("postDeviceList.size() = " + String.valueOf(postDeviceList.size()));
+
 		int index = -1;
 		for (int i = 0; i < postDeviceList.size(); i++) {
-			if (postDeviceList.get(i).device_key == devicekey) {
+			if (postDeviceList.get(i).device_key.equals(devicekey)) {
 				index = i;
 				break;
 			}
@@ -175,6 +188,9 @@ public class IRkitSouthboundRestAPI {
 			postdevice = postDeviceList.get(index);
 		}
 		
+		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
+
+		log.info("postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 		// Loop, check if there is message (actuation commands) buffered on server for this device
 		for (int i = 0; i < postdevice.transparentMessageBuffer.size(); i++) {
 			long seq_id = postdevice.transparentMessageBuffer.get(i).seq_id;
@@ -182,9 +198,12 @@ public class IRkitSouthboundRestAPI {
 				// convert message from "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
 				// to "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3,\"pass\":\"0123456789\"}"
 				// or to "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3}"
+				log.info("to-be-sent message seq_id = " + String.valueOf(seq_id));
+
 				String addIDtoMessage = ",\"id\":" + String.valueOf(seq_id) + "}";
 				getMessagesResponse.message = postdevice.transparentMessageBuffer.get(i).transparent_message.replace("}", addIDtoMessage);
-				
+				log.info("getMessagesResponse.message = " + getMessagesResponse.message);
+
 				break;
 			} else { // this message has been sent before, i.e. it is an old message, shall be removed from the message buffer
 				postdevice.transparentMessageBuffer.remove(i);
@@ -231,18 +250,22 @@ public class IRkitSouthboundRestAPI {
 	 * status_code = 200
 	 * or
 	 * if (status_code != 200)
+	 * 
+	 * Testing Passed OK
+	 * POST https://irkitrestapi.appspot.com/_ah/api/southbound/v1/messages?body=%7B%5C%22format%5C%22%3A%5C%22raw%5C%22%2C%5C%22freq%5C%22%3A38%2C%5C%22data%5C%22%3A%5B18031%2C8755%2C1190%2C1190%2C1190%5D%7D&devicekey=1060001&freq=38
+	 * Returned 204 Response
 	 */
 	class PostMessagesResponse {
     }
 	@ApiMethod(path="messages")
-	public PostMessagesResponse postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body, PostMessagesResponse postMessagesResponse) throws NotFoundException {
+	public void postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body) throws NotFoundException {
 		
 		// first, get the device instance, either from an existing device list,
 		// or create new device into the device list if not existing
 		PostDevice postdevice;
 		int deviceindex = -1;
 		for (int i = 0; i < postDeviceList.size(); i++) {
-			if (postDeviceList.get(i).device_key == devicekey) {
+			if (postDeviceList.get(i).device_key.equals(devicekey)) {
 				deviceindex = i;
 				break;
 			}
@@ -264,7 +287,7 @@ public class IRkitSouthboundRestAPI {
 		PostUser postuser;
 		int userindex = -1;
 		for (int i = 0; i < IRkitNorthBoundRestAPI.postUserList.size(); i++) {
-			if (IRkitNorthBoundRestAPI.postUserList.get(i).client_key == postdevice.client_key) {
+			if (IRkitNorthBoundRestAPI.postUserList.get(i).client_key.equals(postdevice.client_key)) {
 				userindex = i;
 				break;
 			}
@@ -281,33 +304,32 @@ public class IRkitSouthboundRestAPI {
 			postuser = IRkitNorthBoundRestAPI.postUserList.get(userindex);
 		}
 		
+		log.info("IRkitNorthBoundRestAPI.postUserList.size() = " + String.valueOf(IRkitNorthBoundRestAPI.postUserList.size()));
+
 		// save the new Message into PostUser newSignalMessage in the memory
-		if(postuser != null && postdevice != null) {
-			postuser.newSignalMessage.device_id = postdevice.id;
-			postuser.newSignalMessage.transparent_message = body;
-			
-			// "body: IR data" format is "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
-			// need to convert it to Signal format in northbound getmessages request
-			// Format is described in IRKit device API "on_get_messages_request", for client app learning a new signal directly from device, without going to server
-			// this should be the same, when server receives a new learning signal from device.
-			/*
-			gs.write("{\"format\":\"raw\",\"freq\":"); // format fixed to "raw" for now
-		    gs.write(IrCtrl.freq);
-		    gs.write(",\"data\":[");
-		    for (uint16_t i=0; i<IrCtrl.len; i++) {
-		        gs.write( IR_get() );
-		        if (i != IrCtrl.len - 1) {
-		            gs.write(",");
-		        }
-		    }
-		    gs.write("]}");
-		    gs.writeEnd();
-			*/
-			
-		}
-			
+		postuser.newSignalMessage = new PostMessage();
+		postuser.newSignalMessage.device_id = postdevice.id;
+		postuser.newSignalMessage.transparent_message = body;
+		
+		log.info("postuser.newSignalMessage.transparent_message = " + postuser.newSignalMessage.transparent_message);
+
+		// "body: IR data" format is
+		// "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
+		// need to convert it to Signal format in northbound getmessages request
+		// Format is described in IRKit device API "on_get_messages_request",
+		// for client app learning a new signal directly from device, without
+		// going to server
+		// this should be the same, when server receives a new learning signal
+		// from device.
+		/*
+		 * gs.write("{\"format\":\"raw\",\"freq\":"); // format fixed to "raw"
+		 * for now gs.write(IrCtrl.freq); gs.write(",\"data\":["); for (uint16_t
+		 * i=0; i<IrCtrl.len; i++) { gs.write( IR_get() ); if (i != IrCtrl.len -
+		 * 1) { gs.write(","); } } gs.write("]}"); gs.writeEnd();
+		 */
+
 		// response
-		return postMessagesResponse;
+		return;
 	}
 		
 	
@@ -407,10 +429,11 @@ public class IRkitSouthboundRestAPI {
         							// the clienttoken uniquely identify both a devicekey and clientkey
     }
 	@ApiMethod(path="keys")
-    public PostKeysResponse postKeys(@Named("devicekey") String devicekey, PostKeysResponse postKeysResponse) throws NotFoundException {
+    public PostKeysResponse postKeys(@Named("devicekey") String devicekey) throws NotFoundException {
 		// first find out the device from data store
 		try {
 			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+			PostKeysResponse postKeysResponse = new PostKeysResponse();
 			postKeysResponse.clienttoken = device.device_key;	// actually, we can just use devicekey as clienttoken, seems OK, devicekey can identify both a devicekey and clientkey
 			return postKeysResponse;
 

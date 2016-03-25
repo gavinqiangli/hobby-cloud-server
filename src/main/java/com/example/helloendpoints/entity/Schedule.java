@@ -24,8 +24,7 @@ import java.util.Date;
  **/
 @Entity
 public class Schedule {
-	@Parent
-	Key<Irkit> theIrkit;
+	
 	@Id
 	public Long id;
 
@@ -62,14 +61,8 @@ public class Schedule {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public Schedule(String irkit, String client_key, Long device_id, Long signal_id, String repeat, int hour_of_day, int minute) {
+	public Schedule(String client_key, Long device_id, Long signal_id, String repeat, int hour_of_day, int minute) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.client_key = client_key;
 		this.device_id = device_id;

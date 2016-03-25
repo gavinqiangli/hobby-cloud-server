@@ -24,8 +24,7 @@ import java.util.Date;
  **/
 @Entity
 public class MyUser {
-	@Parent
-	Key<Irkit> theIrkit;
+	
 	@Id
 	public Long id;
 
@@ -56,14 +55,8 @@ public class MyUser {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public MyUser(String irkit, String name, String passwd, String client_key, String api_key, String email) {
+	public MyUser(String name, String passwd, String client_key, String api_key, String email) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.name = name;
 		this.passwd = passwd;

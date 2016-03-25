@@ -24,6 +24,52 @@
     "maxAge" : 0
   },
   "methods" : {
+    "northbound.iRkitNorthBoundRestAPI.getUserData" : {
+      "path" : "postuser/{id}",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.getMessages" : {
+      "path" : "messages",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages",
+      "request" : {
+        "parameters" : {
+          "clientkey" : {
+            "type" : "string",
+            "required" : true
+          },
+          "clear" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "northbound.iRkitNorthBoundRestAPI.postMessagesV2" : {
       "path" : "messages_v2",
       "httpMethod" : "POST",
@@ -47,11 +93,10 @@
             "required" : true
           }
         },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
+        "body" : "empty"
       },
       "response" : {
-        "body" : "autoTemplate(backendResponse)"
+        "body" : "empty"
       }
     },
     "northbound.iRkitNorthBoundRestAPI.listSignalData" : {
@@ -290,175 +335,6 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.getUserData" : {
-      "path" : "postuser/{id}",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int32",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.getMessages" : {
-      "path" : "messages",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages",
-      "request" : {
-        "parameters" : {
-          "clientkey" : {
-            "type" : "string",
-            "required" : true
-          },
-          "clear" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.postClients" : {
-      "path" : "clients",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postClients",
-      "request" : {
-        "parameters" : {
-          "apikey" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.postKeys" : {
-      "path" : "keys",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postKeys",
-      "request" : {
-        "parameters" : {
-          "clienttoken" : {
-            "type" : "string",
-            "required" : true
-          },
-          "client_key" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.postApps" : {
-      "path" : "apps",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postApps",
-      "request" : {
-        "parameters" : {
-          "email" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.user.authed" : {
-      "path" : "user/authed",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.authedUser",
-      "request" : {
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.postDevices" : {
-      "path" : "devices",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDevices",
-      "request" : {
-        "parameters" : {
-          "clientkey" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.listUserData" : {
-      "path" : "get_all_user",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUserData",
-      "request" : {
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
     "northbound.iRkitNorthBoundRestAPI.getMessagesV2" : {
       "path" : "messages_v2",
       "httpMethod" : "GET",
@@ -471,27 +347,6 @@
         "parameters" : {
           "clientkey" : {
             "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.getSignalData" : {
-      "path" : "postsignal/{id}",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int32",
             "required" : true
           }
         },
@@ -520,8 +375,7 @@
             "required" : true
           }
         },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
+        "body" : "empty"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -550,8 +404,146 @@
             "required" : true
           }
         },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "empty"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.getSignalData" : {
+      "path" : "postsignal/{id}",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.listUserData" : {
+      "path" : "get_all_user",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUserData",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.postDevices" : {
+      "path" : "devices",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDevices",
+      "request" : {
+        "parameters" : {
+          "clientkey" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.user.authed" : {
+      "path" : "user/authed",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.authedUser",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.postApps" : {
+      "path" : "apps",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postApps",
+      "request" : {
+        "parameters" : {
+          "email" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.postClients" : {
+      "path" : "clients",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postClients",
+      "request" : {
+        "parameters" : {
+          "apikey" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.iRkitNorthBoundRestAPI.postKeys" : {
+      "path" : "keys",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postKeys",
+      "request" : {
+        "parameters" : {
+          "clienttoken" : {
+            "type" : "string",
+            "required" : true
+          },
+          "client_key" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -560,10 +552,78 @@
   },
   "descriptor" : {
     "schemas" : {
-      "PostMessagesResponse" : {
-        "id" : "PostMessagesResponse",
+      "PostUser" : {
+        "id" : "PostUser",
         "type" : "object",
         "properties" : {
+          "newSignalMessage" : {
+            "$ref" : "PostMessage"
+          },
+          "isInitialGetMessages" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "passwd" : {
+            "type" : "string"
+          },
+          "client_key" : {
+            "type" : "string"
+          },
+          "api_key" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostMessage" : {
+        "id" : "PostMessage",
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "seq_id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "device_id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "client_key" : {
+            "type" : "string"
+          },
+          "transparent_message" : {
+            "type" : "string"
+          },
+          "signal_id" : {
+            "type" : "string",
+            "format" : "int64"
+          }
+        }
+      },
+      "GetMessagesResponse" : {
+        "id" : "GetMessagesResponse",
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "$ref" : "PostSignal"
+          },
+          "hostname" : {
+            "type" : "string"
+          },
+          "deviceid" : {
+            "type" : "string"
+          }
         }
       },
       "PostSignal" : {
@@ -675,76 +735,44 @@
           }
         }
       },
-      "PostUser" : {
-        "id" : "PostUser",
+      "PostDoorResponse" : {
+        "id" : "PostDoorResponse",
         "type" : "object",
         "properties" : {
-          "newSignalMessage" : {
-            "$ref" : "PostMessage"
-          },
-          "isInitialGetMessages" : {
-            "type" : "boolean"
-          },
-          "id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "passwd" : {
-            "type" : "string"
-          },
-          "client_key" : {
-            "type" : "string"
-          },
-          "api_key" : {
-            "type" : "string"
-          },
-          "email" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PostMessage" : {
-        "id" : "PostMessage",
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "seq_id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "device_id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "client_key" : {
-            "type" : "string"
-          },
-          "transparent_message" : {
-            "type" : "string"
-          },
-          "signal_id" : {
-            "type" : "string",
-            "format" : "int64"
-          }
-        }
-      },
-      "GetMessagesResponse" : {
-        "id" : "GetMessagesResponse",
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "$ref" : "PostSignal"
-          },
           "hostname" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostUserCollection" : {
+        "id" : "PostUserCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "PostUser"
+            }
+          }
+        }
+      },
+      "PostDevicesResponse" : {
+        "id" : "PostDevicesResponse",
+        "type" : "object",
+        "properties" : {
+          "devicekey" : {
             "type" : "string"
           },
           "deviceid" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostAppsResponse" : {
+        "id" : "PostAppsResponse",
+        "type" : "object",
+        "properties" : {
+          "message" : {
             "type" : "string"
           }
         }
@@ -769,58 +797,20 @@
             "type" : "string"
           }
         }
-      },
-      "PostAppsResponse" : {
-        "id" : "PostAppsResponse",
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PostDevicesResponse" : {
-        "id" : "PostDevicesResponse",
-        "type" : "object",
-        "properties" : {
-          "devicekey" : {
-            "type" : "string"
-          },
-          "deviceid" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PostUserCollection" : {
-        "id" : "PostUserCollection",
-        "type" : "object",
-        "properties" : {
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "PostUser"
-            }
-          }
-        }
-      },
-      "PostDoorResponse" : {
-        "id" : "PostDoorResponse",
-        "type" : "object",
-        "properties" : {
-          "hostname" : {
-            "type" : "string"
-          }
-        }
       }
     },
     "methods" : {
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessagesV2" : {
-        "request" : {
-          "$ref" : "PostMessagesResponse"
-        },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData" : {
         "response" : {
-          "$ref" : "PostMessagesResponse"
+          "$ref" : "PostUser"
         }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages" : {
+        "response" : {
+          "$ref" : "GetMessagesResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessagesV2" : {
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignalData" : {
         "response" : {
@@ -894,54 +884,21 @@
           "$ref" : "PostUser"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessagesV2" : {
         "response" : {
-          "$ref" : "PostUser"
+          "$ref" : "PostSignal"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages" : {
-        "request" : {
-          "$ref" : "GetMessagesResponse"
-        },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDoor" : {
         "response" : {
-          "$ref" : "GetMessagesResponse"
+          "$ref" : "PostDoorResponse"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postClients" : {
-        "request" : {
-          "$ref" : "PostClientsResponse"
-        },
-        "response" : {
-          "$ref" : "PostClientsResponse"
-        }
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessages" : {
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postKeys" : {
-        "request" : {
-          "$ref" : "PostKeysResponse"
-        },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData" : {
         "response" : {
-          "$ref" : "PostKeysResponse"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postApps" : {
-        "request" : {
-          "$ref" : "PostAppsResponse"
-        },
-        "response" : {
-          "$ref" : "PostAppsResponse"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.authedUser" : {
-        "response" : {
-          "$ref" : "PostUser"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDevices" : {
-        "request" : {
-          "$ref" : "PostDevicesResponse"
-        },
-        "response" : {
-          "$ref" : "PostDevicesResponse"
+          "$ref" : "PostSignal"
         }
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUserData" : {
@@ -949,30 +906,29 @@
           "$ref" : "PostUserCollection"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessagesV2" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDevices" : {
         "response" : {
-          "$ref" : "PostSignal"
+          "$ref" : "PostDevicesResponse"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.authedUser" : {
         "response" : {
-          "$ref" : "PostSignal"
+          "$ref" : "PostUser"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDoor" : {
-        "request" : {
-          "$ref" : "PostDoorResponse"
-        },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postApps" : {
         "response" : {
-          "$ref" : "PostDoorResponse"
+          "$ref" : "PostAppsResponse"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessages" : {
-        "request" : {
-          "$ref" : "PostMessagesResponse"
-        },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postClients" : {
         "response" : {
-          "$ref" : "PostMessagesResponse"
+          "$ref" : "PostClientsResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postKeys" : {
+        "response" : {
+          "$ref" : "PostKeysResponse"
         }
       }
     }

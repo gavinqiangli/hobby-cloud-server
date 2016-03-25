@@ -29,8 +29,7 @@ import java.util.Date;
  **/
 @Entity
 public class Signal {
-	@Parent
-	Key<Irkit> theIrkit;
+
 	@Id
 	public Long id;
 
@@ -57,14 +56,8 @@ public class Signal {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public Signal(String irkit, String name, String format, double freq, int[] data, String client_key) {
+	public Signal(String name, String format, double freq, int[] data, String client_key) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.name = name;
 		this.format = format;
