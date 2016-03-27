@@ -190,7 +190,7 @@ public class IRkitSouthboundRestAPI {
 		
 		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
 
-		log.info("postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
+		log.info("before consume, postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 		// Loop, check if there is message (actuation commands) buffered on server for this device
 		for (int i = 0; i < postdevice.transparentMessageBuffer.size(); i++) {
 			long seq_id = postdevice.transparentMessageBuffer.get(i).seq_id;
@@ -210,6 +210,7 @@ public class IRkitSouthboundRestAPI {
 				i--;
 			}
 		}
+		log.info("after consume, postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 			
 		// this method shall only provide success response
 		return getMessagesResponse;

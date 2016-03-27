@@ -55,7 +55,7 @@ public class CacheCleaner extends HttpServlet {
     private static final Logger log = Logger.getLogger(CacheCleaner.class.getName());
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        log.severe("EXECUTING TASK FROM DEFAULT QUEUE: " + req.getParameter("job_id"));
+        log.info("EXECUTING TASK FROM DEFAULT QUEUE: " + req.getParameter("job_id"));
         
         // clean the cache
 		// every 30min to clear cache. Learning signal cache, actuation command

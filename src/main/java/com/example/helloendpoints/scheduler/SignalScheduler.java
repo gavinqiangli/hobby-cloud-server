@@ -47,6 +47,7 @@ import static com.google.appengine.api.taskqueue.TaskOptions.Builder.*;
  *         introduces AppEngine default queue which we use for executing our
  *         scheduled tasks in the background.
  *
+ * Testing Passed OK
  */
 
 @SuppressWarnings("serial")
@@ -56,11 +57,11 @@ public class SignalScheduler extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        log.severe("Running System schedule check, loop every 1 minute");
+        log.info("Running System schedule check, loop every 1 minute");
         Calendar calendar = Calendar.getInstance();
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);	// HOUR_OF_DAY indicates 24-hour clock
         int currentMinute = calendar.get(Calendar.MINUTE);
-        log.severe("Current hour: " + currentHour + ", Current minute: " + currentMinute);
+        log.info("Current hour: " + currentHour + ", Current minute: " + currentMinute);
 
 		List<Schedule> list = ObjectifyService.ofy().load().type(Schedule.class).filter("hour_of_day", currentHour)
 				.filter("minute", currentMinute).list();

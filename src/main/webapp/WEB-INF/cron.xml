@@ -9,8 +9,7 @@
   <cron>
     <url>/signalscheduler</url>
     <description>Send scheduled signal commands</description>
-    <schedule>every 30 minutes</schedule>
-    <timezone>Europe/Stockholm</timezone>
+    <schedule>every 1 minutes</schedule>
     <retry-parameters>
       <min-backoff-seconds>2.5</min-backoff-seconds>
       <max-doublings>5</max-doublings>

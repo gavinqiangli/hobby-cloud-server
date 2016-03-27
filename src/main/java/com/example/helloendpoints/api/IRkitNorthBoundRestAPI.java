@@ -854,6 +854,14 @@ public class IRkitNorthBoundRestAPI {
 		return scheduleDataList;
 	}
 	
+	/**
+	 * 
+	 * @param post_id
+	 * @param postScheduleData
+	 * @return
+	 * 
+	 * Testing Passed OK
+	 */
 	@ApiMethod(name = "schedule.post", httpMethod = "post")
 	public PostSchedule insertScheduleData(@Named("post_id") String post_id, PostSchedule postScheduleData) {
 

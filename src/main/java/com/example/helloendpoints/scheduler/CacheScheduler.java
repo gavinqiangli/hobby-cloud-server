@@ -56,8 +56,8 @@ public class CacheScheduler extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        log.severe("Running System schedule check, loop every 30 minute");
-        log.severe("Current time: " + System.currentTimeMillis());
+        log.info("Running System schedule check, loop every 30 minute");
+        log.info("Current time: " + System.currentTimeMillis());
 
 		processJob();
        

@@ -53,8 +53,12 @@ import com.googlecode.objectify.ObjectifyService;
 public class SignalSender extends HttpServlet {
     private static final Logger log = Logger.getLogger(SignalSender.class.getName());
 
+    /**
+     * Testing Passed OK
+     * Same response as Call IRkitNorthBoundRestAPI: postMessagesV2
+     */
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        log.severe("EXECUTING TASK FROM FAST QUEUE " + req.getParameter("job_id"));
+        log.info("EXECUTING TASK FROM FAST QUEUE " + req.getParameter("job_id"));
         String client_key = req.getParameter("client_key");
         String device_id = req.getParameter("device_id");
         String signal_id = req.getParameter("signal_id");
@@ -151,10 +155,10 @@ public class SignalSender extends HttpServlet {
 		// southbound getMessages request
 		// first, get the device instance, either from an existing device list,
 		// or, create new device into the device list if not existing
-		PostDevice postdevice = null;
+		PostDevice postdevice;
 		int index = -1;
 		for (int i = 0; i < IRkitSouthboundRestAPI.postDeviceList.size(); i++) {
-			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id == ldeviceid) {
+			if (IRkitSouthboundRestAPI.postDeviceList.get(i).id.equals(ldeviceid)) {
 				index = i;
 				break;
 			}
@@ -172,10 +176,6 @@ public class SignalSender extends HttpServlet {
 		}
 
 		// 4. add the new signal command into postdevice
-		if (postdevice != null) {
-			postdevice.transparentMessageBuffer.add(postmessage);
-			
-		}
-        
+		postdevice.transparentMessageBuffer.add(postmessage);        
     }
 }
