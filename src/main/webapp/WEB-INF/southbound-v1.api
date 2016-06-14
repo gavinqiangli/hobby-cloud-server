@@ -125,20 +125,14 @@
       }
     },
     "southbound.temperature.post" : {
-      "path" : "posttemperature/{post_id}",
+      "path" : "temperature",
       "httpMethod" : "post",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperatureData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperature",
       "request" : {
-        "parameters" : {
-          "post_id" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
         "body" : "autoTemplate(backendRequest)",
         "bodyName" : "resource"
       },
@@ -198,7 +192,7 @@
           "$ref" : "PostKeysResponse"
         }
       },
-      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperatureData" : {
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperature" : {
         "request" : {
           "$ref" : "PostTemperature"
         },

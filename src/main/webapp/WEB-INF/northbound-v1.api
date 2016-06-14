@@ -24,27 +24,6 @@
     "maxAge" : 0
   },
   "methods" : {
-    "northbound.iRkitNorthBoundRestAPI.getUserData" : {
-      "path" : "postuser/{id}",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int32",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
     "northbound.iRkitNorthBoundRestAPI.getMessages" : {
       "path" : "messages",
       "httpMethod" : "GET",
@@ -61,6 +40,48 @@
           },
           "clear" : {
             "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.user.get" : {
+      "path" : "user",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUser",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.schedule.get" : {
+      "path" : "schedule",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSchedule",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int32",
             "required" : true
           }
         },
@@ -145,14 +166,14 @@
         "body" : "empty"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.getSignalData" : {
-      "path" : "postsignal/{id}",
+    "northbound.signal.get" : {
+      "path" : "signal",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignal",
       "request" : {
         "parameters" : {
           "id" : {
@@ -166,16 +187,78 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.listUserData" : {
-      "path" : "get_all_user",
+    "northbound.signal.get.all" : {
+      "path" : "signal/all",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUserData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignal",
       "request" : {
         "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.signal.post" : {
+      "path" : "signal",
+      "httpMethod" : "post",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSignal",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.schedule.get.all" : {
+      "path" : "schedule/all",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSchedule",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.user.get.all" : {
+      "path" : "user/all",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUser",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "northbound.user.post" : {
+      "path" : "postuser",
+      "httpMethod" : "post",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertUser",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -313,23 +396,8 @@
         "body" : "empty"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.listSignalData" : {
-      "path" : "get_all_signal",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignalData",
-      "request" : {
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.listSignalPerUser" : {
-      "path" : "get_all_signal_for_one_user",
+    "northbound.signal.get.per_user" : {
+      "path" : "signal/per_user",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
@@ -349,30 +417,8 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.signal.post" : {
-      "path" : "postsignal/{post_id}",
-      "httpMethod" : "post",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSignalData",
-      "request" : {
-        "parameters" : {
-          "post_id" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.signalname.post" : {
-      "path" : "postsignal/{signalid}/{signalname}",
+    "northbound.signal.name.post" : {
+      "path" : "signal/name",
       "httpMethod" : "post",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
@@ -396,14 +442,14 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.getTemperatureData" : {
-      "path" : "posttemperature/{id}",
+    "northbound.temperature.get" : {
+      "path" : "temperature",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getTemperatureData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getTemperature",
       "request" : {
         "parameters" : {
           "id" : {
@@ -417,14 +463,14 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.listTemperatureData" : {
-      "path" : "get_all_temperature",
+    "northbound.temperature.get.all" : {
+      "path" : "temperature/all",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listTemperatureData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listTemperature",
       "request" : {
         "body" : "empty"
       },
@@ -432,14 +478,14 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "northbound.iRkitNorthBoundRestAPI.getLatestTemperatureData" : {
-      "path" : "get_latest_temperature",
+    "northbound.temperature.get.latest" : {
+      "path" : "temperature/latest",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getLatestTemperatureData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getLatestTemperature",
       "request" : {
         "body" : "empty"
       },
@@ -448,100 +494,30 @@
       }
     },
     "northbound.temperature.post" : {
-      "path" : "posttemperature/{post_id}",
+      "path" : "temperature",
       "httpMethod" : "post",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertTemperatureData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertTemperature",
       "request" : {
-        "parameters" : {
-          "post_id" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
         "body" : "autoTemplate(backendRequest)",
         "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.getScheduleData" : {
-      "path" : "postschedule/{id}",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getScheduleData",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int32",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.iRkitNorthBoundRestAPI.listScheduleData" : {
-      "path" : "get_all_schedule",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listScheduleData",
-      "request" : {
-        "body" : "empty"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
       }
     },
     "northbound.schedule.post" : {
-      "path" : "postschedule/{post_id}",
+      "path" : "postschedule",
       "httpMethod" : "post",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
       "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertScheduleData",
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSchedule",
       "request" : {
-        "parameters" : {
-          "post_id" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "northbound.user.post" : {
-      "path" : "postuser/{post_id}",
-      "httpMethod" : "post",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertUserData",
-      "request" : {
-        "parameters" : {
-          "post_id" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
         "body" : "autoTemplate(backendRequest)",
         "bodyName" : "resource"
       },
@@ -552,6 +528,49 @@
   },
   "descriptor" : {
     "schemas" : {
+      "GetMessagesResponse" : {
+        "id" : "GetMessagesResponse",
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "$ref" : "PostSignal"
+          },
+          "hostname" : {
+            "type" : "string"
+          },
+          "deviceid" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PostSignal" : {
+        "id" : "PostSignal",
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "format" : {
+            "type" : "string"
+          },
+          "freq" : {
+            "type" : "number"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer"
+            }
+          },
+          "client_key" : {
+            "type" : "string"
+          }
+        }
+      },
       "PostUser" : {
         "id" : "PostUser",
         "type" : "object",
@@ -611,46 +630,33 @@
           }
         }
       },
-      "GetMessagesResponse" : {
-        "id" : "GetMessagesResponse",
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "$ref" : "PostSignal"
-          },
-          "hostname" : {
-            "type" : "string"
-          },
-          "deviceid" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PostSignal" : {
-        "id" : "PostSignal",
+      "PostSchedule" : {
+        "id" : "PostSchedule",
         "type" : "object",
         "properties" : {
           "id" : {
             "type" : "string",
             "format" : "int64"
           },
-          "name" : {
-            "type" : "string"
-          },
-          "format" : {
-            "type" : "string"
-          },
-          "freq" : {
-            "type" : "number"
-          },
-          "data" : {
-            "type" : "array",
-            "items" : {
-              "type" : "integer"
-            }
-          },
           "client_key" : {
             "type" : "string"
+          },
+          "device_id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "signal_id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "repeat" : {
+            "type" : "string"
+          },
+          "hour_of_day" : {
+            "type" : "integer"
+          },
+          "minute" : {
+            "type" : "integer"
           }
         }
       },
@@ -660,6 +666,30 @@
         "properties" : {
           "hostname" : {
             "type" : "string"
+          }
+        }
+      },
+      "PostSignalCollection" : {
+        "id" : "PostSignalCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "PostSignal"
+            }
+          }
+        }
+      },
+      "PostScheduleCollection" : {
+        "id" : "PostScheduleCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "PostSchedule"
+            }
           }
         }
       },
@@ -717,18 +747,6 @@
           }
         }
       },
-      "PostSignalCollection" : {
-        "id" : "PostSignalCollection",
-        "type" : "object",
-        "properties" : {
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "PostSignal"
-            }
-          }
-        }
-      },
       "PostTemperature" : {
         "id" : "PostTemperature",
         "type" : "object",
@@ -755,59 +773,22 @@
             }
           }
         }
-      },
-      "PostSchedule" : {
-        "id" : "PostSchedule",
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "client_key" : {
-            "type" : "string"
-          },
-          "device_id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "signal_id" : {
-            "type" : "string",
-            "format" : "int64"
-          },
-          "repeat" : {
-            "type" : "string"
-          },
-          "hour_of_day" : {
-            "type" : "integer"
-          },
-          "minute" : {
-            "type" : "integer"
-          }
-        }
-      },
-      "PostScheduleCollection" : {
-        "id" : "PostScheduleCollection",
-        "type" : "object",
-        "properties" : {
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "PostSchedule"
-            }
-          }
-        }
       }
     },
     "methods" : {
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUserData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages" : {
+        "response" : {
+          "$ref" : "GetMessagesResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getUser" : {
         "response" : {
           "$ref" : "PostUser"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getMessages" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSchedule" : {
         "response" : {
-          "$ref" : "GetMessagesResponse"
+          "$ref" : "PostSchedule"
         }
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDoor" : {
@@ -822,14 +803,40 @@
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessages" : {
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignalData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getSignal" : {
         "response" : {
           "$ref" : "PostSignal"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUserData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignal" : {
+        "response" : {
+          "$ref" : "PostSignalCollection"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSignal" : {
+        "request" : {
+          "$ref" : "PostSignal"
+        },
+        "response" : {
+          "$ref" : "PostSignal"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSchedule" : {
+        "response" : {
+          "$ref" : "PostScheduleCollection"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listUser" : {
         "response" : {
           "$ref" : "PostUserCollection"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertUser" : {
+        "request" : {
+          "$ref" : "PostUser"
+        },
+        "response" : {
+          "$ref" : "PostUser"
         }
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postDevices" : {
@@ -859,22 +866,9 @@
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.postMessagesV2" : {
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignalData" : {
-        "response" : {
-          "$ref" : "PostSignalCollection"
-        }
-      },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listSignalPerUser" : {
         "response" : {
           "$ref" : "PostSignalCollection"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSignalData" : {
-        "request" : {
-          "$ref" : "PostSignal"
-        },
-        "response" : {
-          "$ref" : "PostSignal"
         }
       },
       "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSignalName" : {
@@ -882,22 +876,22 @@
           "$ref" : "PostSignal"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getTemperatureData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getTemperature" : {
         "response" : {
           "$ref" : "PostTemperature"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listTemperatureData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listTemperature" : {
         "response" : {
           "$ref" : "PostTemperatureCollection"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getLatestTemperatureData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getLatestTemperature" : {
         "response" : {
           "$ref" : "PostTemperature"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertTemperatureData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertTemperature" : {
         "request" : {
           "$ref" : "PostTemperature"
         },
@@ -905,30 +899,12 @@
           "$ref" : "PostTemperature"
         }
       },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.getScheduleData" : {
-        "response" : {
-          "$ref" : "PostSchedule"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.listScheduleData" : {
-        "response" : {
-          "$ref" : "PostScheduleCollection"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertScheduleData" : {
+      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertSchedule" : {
         "request" : {
           "$ref" : "PostSchedule"
         },
         "response" : {
           "$ref" : "PostSchedule"
-        }
-      },
-      "com.example.helloendpoints.api.IRkitNorthBoundRestAPI.insertUserData" : {
-        "request" : {
-          "$ref" : "PostUser"
-        },
-        "response" : {
-          "$ref" : "PostUser"
         }
       }
     }

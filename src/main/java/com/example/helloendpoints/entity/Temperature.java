@@ -24,8 +24,7 @@ import java.util.Date;
  **/
 @Entity
 public class Temperature {
-	@Parent
-	Key<Irkit> theIrkit;
+
 	@Id
 	public Long id;
 
@@ -51,14 +50,8 @@ public class Temperature {
 	/**
 	 * Constructor takes all important fields
 	 **/
-	public Temperature(String irkit, String irkit_id, String signal_name, String signal_content) {
+	public Temperature(String irkit_id, String signal_name, String signal_content) {
 		this();
-		if (irkit != null) {
-			theIrkit = Key.create(Irkit.class, irkit); // Creating the Ancestor
-														// key
-		} else {
-			theIrkit = Key.create(Irkit.class, "default");
-		}
 		
 		this.irkit_id = irkit_id;
 		this.signal_name = signal_name;

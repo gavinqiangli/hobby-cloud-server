@@ -23,6 +23,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -101,14 +102,16 @@ public class IRkitNorthBoundRestAPI {
 	@ApiMethod(path="door")
 	public PostDoorResponse postDoor(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid) throws NotFoundException {
 		
+		PostDoorResponse postDoorResponse = new PostDoorResponse();
+
 		// shall we authenticate client_key here? shall we authenticate
 		// client_key for every API call?
 		// 1. first authenticate the user
-		try {
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
-
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an clientkey: " + clientkey);
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+		if (user == null) {
+			log.info("User not found with an clientkey: " + clientkey);
+			return postDoorResponse; // to do: what error code shall be
+										// returned?
 		}
 		
 		// convert string id to long id 
@@ -119,7 +122,6 @@ public class IRkitNorthBoundRestAPI {
 		// if device has done bonjour and has done the southbound API "postDoor" to register its hostname, the hostname field in data store shall be real hostname
 		try {
 			Device device = ObjectifyService.ofy().load().type(Device.class).id(ldeviceid).now();	// note: id() or filter() won't work in case of there is ancestor key
-			PostDoorResponse postDoorResponse = new PostDoorResponse();
 			postDoorResponse.hostname = device.hostname;
 			// this method only has success response
 			return postDoorResponse;
@@ -141,13 +143,15 @@ public class IRkitNorthBoundRestAPI {
 	 * @throws NotFoundException
 	 * Client App is doing long polling "get" here, e.g. "get" for every 1s
 	 * One user can have multiple irkit devices. 
-	 * waitForSignal -> getMessage -> postSignalData is bound/registered per User, i.e.one user can register signal for any of his/her devices
+	 * waitForSignal -> getMessage -> postSignal is bound/registered per User, i.e.one user can register signal for any of his/her devices
 	 * alternative is to register the signal per device
 	 * right now it is registered/bound per User
 	 */
 	@ApiMethod(path="messages_v2")
-	public PostSignal getMessagesV2(@Named("clientkey") String clientkey) throws NotFoundException {
+	public PostSignal getMessagesV2(@Named("clientkey") String clientkey) {
 		
+		PostSignal postsignal = new PostSignal();
+
 		// first, get the user instance, either from an existing user list, or
 		// create new user into the user list if not existing
 		PostUser postuser;
@@ -159,26 +163,28 @@ public class IRkitNorthBoundRestAPI {
 			}
 		}
 		if (index == -1) { // if user doesn't exist in the list
-			try {
-				MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first()
+					.now();
+			if (user != null) {
 				postuser = new PostUser(user.id, user.name, user.passwd, user.client_key, user.api_key, user.email);
 				postUserList.add(postuser);
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("User not found with an clientkey: " + clientkey);
+			} else {
+				log.info("User not found with an clientkey: " + clientkey);
+				return postsignal; // to do: what error code shall be returned? 
 			}
 		} else {
 			postuser = postUserList.get(index);
 		}
 				
-		// for the first time getMessages, newSignalData shall be always initiated "null"
+		// for the first time getMessages, newSignal shall be always initiated "null"
 		if (postuser.isInitialGetMessages == true) {
 			postuser.newSignalMessage = null;
 		}
 		
-		// for the second and onwards getMessages, don't touch newSignalData
+		// for the second and onwards getMessages, don't touch newSignal
 		postuser.isInitialGetMessages = false;
 		
-		// if newSignalData is captured not "null", getMessages is returned not "null", wait/capture new signal data is done, 
+		// if newSignal is captured not "null", getMessages is returned not "null", wait/capture new signal data is done, 
 		// getMessages session will be ended, now must reinitialize  
 		if (postuser.newSignalMessage != null) {
 			postuser.isInitialGetMessages = true;
@@ -208,7 +214,7 @@ public class IRkitNorthBoundRestAPI {
 										// user, and then return to server and
 										// saved into server database
 
-			Signal signalData = new Signal(signal_name, format, freq, data, clientkey);
+			Signal signal = new Signal(signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the
 			// call
@@ -216,12 +222,11 @@ public class IRkitNorthBoundRestAPI {
 			// will immediately get a new page using redirect and we want the
 			// data
 			// to be present.
-			ObjectifyService.ofy().save().entity(signalData).now();
+			ObjectifyService.ofy().save().entity(signal).now();
 			// end data store
 			
-			PostSignal postsignal = new PostSignal();
 			// Now the id is available
-			postsignal.id = signalData.id;	// must also pass signal id to client app, in order for client app to give a signal name and pass signal name back to server data store
+			postsignal.id = signal.id;	// must also pass signal id to client app, in order for client app to give a signal name and pass signal name back to server data store
 			postsignal.format = format;
 			postsignal.freq = freq;
 			postsignal.data = data;
@@ -231,7 +236,7 @@ public class IRkitNorthBoundRestAPI {
 		}
 		
 		// failure response
-		return null;
+		return postsignal; // to do: doesn't make sense to return null, but what error code shall be returned?
 	}
 	
 	/**
@@ -239,7 +244,7 @@ public class IRkitNorthBoundRestAPI {
 	 *
 	 * Original design
 	 * According to Android client request, the server "getMessages" call shall do a callback to the Android client, 
-	 * when server receives a "newSignalData" from the Irkit device
+	 * when server receives a "newSignal" from the Irkit device
 	 * 
 	 * GET https://irkitrestapi.appspot.com/_ah/api/northbound/v1/messages
 	 * GET /1/messages 
@@ -297,6 +302,8 @@ public class IRkitNorthBoundRestAPI {
 	// to do: client app need to change to json format for sending the request
 	// to do: check how the callback response works, i.e. how to callback
 	public GetMessagesResponse getMessages(@Named("clientkey") String clientkey, @Named("clear") String clear) throws NotFoundException {
+		
+		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
 
 		// first, get the user instance, either from an existing user list, or
 		// create new user into the user list if not existing
@@ -309,17 +316,20 @@ public class IRkitNorthBoundRestAPI {
 			}
 		}
 		if (index == -1) { // if user doesn't exist in the list
-			try {
-				MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first()
+					.now();
+			if (user != null) {
 				postuser = new PostUser(user.id, user.name, user.passwd, user.client_key, user.api_key, user.email);
 				postUserList.add(postuser);
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("User not found with an clientkey: " + clientkey);
+			} else {
+				log.info("User not found with an clientkey: " + clientkey);
+				return getMessagesResponse; // to do: what error code shall be
+											// returned?
 			}
 		} else {
 			postuser = postUserList.get(index);
 		}
-		
+
 		log.info("postUserList.size() = " + String.valueOf(postUserList.size()));
 
 		
@@ -338,7 +348,7 @@ public class IRkitNorthBoundRestAPI {
 			log.info("postuser.newSignalMessage.transparent_message = " + postuser.newSignalMessage.transparent_message);
 			
 			// begin data store
-			Signal signalData;
+			Signal signal;
 			
 			// need to convert the transparent_message received from southbound postmessages request to the signal format
 			// transparent_message format is "{\"format\":\"raw\",\"freq\":38,\"data\":[18031,8755,1190,1190,1190]}"
@@ -362,21 +372,20 @@ public class IRkitNorthBoundRestAPI {
 
 			String signal_name = "";	// real name shall be given by end user, and then return to server and saved into server database			
 			
-			signalData = new Signal(signal_name, format, freq, data, clientkey);
+			signal = new Signal(signal_name, format, freq, data, clientkey);
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
 			// will immediately get a new page using redirect and we want the data
 			// to be present.
-			ObjectifyService.ofy().save().entity(signalData).now();
+			ObjectifyService.ofy().save().entity(signal).now();
 			// end data store
 				
 			// prepare for response
 			// read signal id from data store
 			// Now the id is available
-			GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
 			getMessagesResponse.message = new PostSignal();
-			getMessagesResponse.message.id = signalData.id;	// must also pass signal id to client app, in order for client app to give a signal name and pass signal name back to server data store
+			getMessagesResponse.message.id = signal.id;	// must also pass signal id to client app, in order for client app to give a signal name and pass signal name back to server data store
 			getMessagesResponse.message.format = format;
 			getMessagesResponse.message.freq = freq;
 			getMessagesResponse.message.data = data;
@@ -394,8 +403,8 @@ public class IRkitNorthBoundRestAPI {
 			}
 		}
 		
-		// failure response
-		return null;
+		// failure response ???
+		return getMessagesResponse; // to do: what error code shall be returned?
 	}
 	
 	
@@ -466,11 +475,10 @@ public class IRkitNorthBoundRestAPI {
 	public void postMessages(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("message") String message) throws NotFoundException {
 		
 		// 1. first authenticate the user
-		try {
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
-
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an clientkey: " + clientkey);
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+		if (user == null) {
+			log.info("User not found with an clientkey: " + clientkey);
+			return; // to do: what error code shall be returned?
 		}
 
 		// 2. store all server-sent Messages (actuation commands) on Server side data base, for data mining purpose
@@ -544,12 +552,11 @@ public class IRkitNorthBoundRestAPI {
 	public void postMessagesV2(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("signalid") String signalid) throws NotFoundException {
 		
 		// 1. first authenticate the user
-		try {	
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
-						
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an client_key: " + clientkey);
-		}	
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+		if (user == null) {
+			log.info("User not found with an client_key: " + clientkey);
+			return; // to do: what error code shall be returned?
+		}
 		
 		// 2. store the Message on Server data store
 		// begin data store
@@ -642,12 +649,13 @@ public class IRkitNorthBoundRestAPI {
 	 * **
 	 **/ 
 
-	public PostSignal getSignalData(@Named("id") Integer id) throws NotFoundException {
+	@ApiMethod(name = "signal.get", path="signal")
+	public PostSignal getSignal(@Named("id") Integer id) throws NotFoundException {
 		// read from data store
 		try {
-			Signal signalData = ObjectifyService.ofy().load().type(Signal.class).list().get(id);
-			PostSignal postSignalData = new PostSignal(signalData.id, signalData.name, signalData.format, signalData.freq, signalData.data, signalData.client_key);
-			return postSignalData;
+			Signal signal = ObjectifyService.ofy().load().type(Signal.class).list().get(id);
+			PostSignal postSignal = new PostSignal(signal.id, signal.name, signal.format, signal.freq, signal.data, signal.client_key);
+			return postSignal;
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotFoundException("Greeting not found with an index: " + id);
 		}
@@ -659,15 +667,15 @@ public class IRkitNorthBoundRestAPI {
 	 * 
 	 * Testing Passed OK
 	 */
-	@ApiMethod(path="get_all_signal")
-	public ArrayList<PostSignal> listSignalData() {
+	@ApiMethod(name = "signal.get.all", path="signal/all")
+	public ArrayList<PostSignal> listSignal() {
 		// read from data store
-		ArrayList<PostSignal> signalDataList = new ArrayList<PostSignal>();
+		ArrayList<PostSignal> signalList = new ArrayList<PostSignal>();
 		List<Signal> list = ObjectifyService.ofy().load().type(Signal.class).list();
-		for (Signal signalData : list) {
-			signalDataList.add(new PostSignal(signalData.id, signalData.name, signalData.format, signalData.freq, signalData.data, signalData.client_key));
+		for (Signal signal : list) {
+			signalList.add(new PostSignal(signal.id, signal.name, signal.format, signal.freq, signal.data, signal.client_key));
 		}
-		return signalDataList;
+		return signalList;
 	}
 	
 	/** 
@@ -678,44 +686,43 @@ public class IRkitNorthBoundRestAPI {
 	 * Testing Passed OK
 	 * Returned 200OK response
 	 */
-	@ApiMethod(path="get_all_signal_for_one_user")
+	@ApiMethod(name = "signal.get.per_user", path="signal/per_user")
 	public ArrayList<PostSignal> listSignalPerUser(@Named("clientkey") String clientkey) {
 		// read from data store
-		ArrayList<PostSignal> signalDataList = new ArrayList<PostSignal>();
+		ArrayList<PostSignal> signalList = new ArrayList<PostSignal>();
 		List<Signal> list = ObjectifyService.ofy().load().type(Signal.class).filter("client_key", clientkey).list();
-		for (Signal signalData : list) {
-			signalDataList.add(new PostSignal(signalData.id, signalData.name, signalData.format, signalData.freq, signalData.data, signalData.client_key));
+		for (Signal signal : list) {
+			signalList.add(new PostSignal(signal.id, signal.name, signal.format, signal.freq, signal.data, signal.client_key));
 		}
-		return signalDataList;
+		return signalList;
 	}
 
 	/**
 	 * Android Client App post a new signal, for registration of newly learned signal into cloud database
-	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/postsignal/2
-	 * @param post_id
-	 * @param postSignalData
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/signal
+	 * @param postSignal
 	 * @return
 	 */
-	@ApiMethod(name = "signal.post", httpMethod = "post")
-	public PostSignal insertSignalData(@Named("post_id") String post_id, PostSignal postSignalData) {
+	@ApiMethod(name = "signal.post", path = "signal", httpMethod = "post")
+	public PostSignal insertSignal(PostSignal postSignal) {
 		// begin data store
-		Signal signalData;
+		Signal signal;
 
-		signalData = new Signal(postSignalData.name, postSignalData.format, postSignalData.freq, postSignalData.data, postSignalData.client_key);
+		signal = new Signal(postSignal.name, postSignal.format, postSignal.freq, postSignal.data, postSignal.client_key);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
 		// will immediately get a new page using redirect and we want the data
 		// to be present.
-		ObjectifyService.ofy().save().entity(signalData).now();
+		ObjectifyService.ofy().save().entity(signal).now();
 
 		// end data store
 
 		PostSignal response = new PostSignal();
-		response.name = postSignalData.name;
-		response.format = postSignalData.format;
-		response.freq = postSignalData.freq;
-		response.data = postSignalData.data;
+		response.name = postSignal.name;
+		response.format = postSignal.format;
+		response.freq = postSignal.freq;
+		response.data = postSignal.data;
 
 		return response;
 	}
@@ -726,7 +733,7 @@ public class IRkitNorthBoundRestAPI {
 	 * After learning a new signal, end user shall give a name for the signal on client app, 
 	 * and then client app shall call server api to store the signal name on server data store
 	 * 
-	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/postsignalname/
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/signal/name
 	 * @param signalid
 	 * @param signalname
 	 * @return
@@ -735,17 +742,17 @@ public class IRkitNorthBoundRestAPI {
 	 * Testing Passed OK
 	 * Returned 200OK Response
 	 */
-	@ApiMethod(name = "signalname.post", httpMethod = "post")
+	@ApiMethod(name = "signal.name.post", path = "signal/name", httpMethod = "post")
 	public PostSignal insertSignalName(@Named("signalid") String signalid, @Named("signalname") String signalname) throws NotFoundException {
 		
 		// read from data store
 		try {
 			Long lsignalid = Long.valueOf(signalid);
-			Signal signalData = ObjectifyService.ofy().load().type(Signal.class).id(lsignalid).now();	// note: id() or filter() won't work in case of there is ancestor key
-			signalData.name = signalname;
-			ObjectifyService.ofy().save().entity(signalData).now();	// save the signal name into signal data store
-			PostSignal postSignalData = new PostSignal(signalData.id, signalData.name, signalData.format, signalData.freq, signalData.data, signalData.client_key);
-			return postSignalData;
+			Signal signal = ObjectifyService.ofy().load().type(Signal.class).id(lsignalid).now();	// note: id() or filter() won't work in case of there is ancestor key
+			signal.name = signalname;
+			ObjectifyService.ofy().save().entity(signal).now();	// save the signal name into signal data store
+			PostSignal postSignal = new PostSignal(signal.id, signal.name, signal.format, signal.freq, signal.data, signal.client_key);
+			return postSignal;
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotFoundException("Signal not found with an signalid: " + signalid);
 		}
@@ -756,73 +763,75 @@ public class IRkitNorthBoundRestAPI {
 	 * **
 	 **/
 
-
-	public PostTemperature getTemperatureData(@Named("id") Integer id) throws NotFoundException {
+	@ApiMethod(name = "temperature.get", path="temperature")
+	public PostTemperature getTemperature(@Named("id") Integer id) throws NotFoundException {
 		// read from data store
 		try {
-			Temperature temperatureData = ObjectifyService.ofy().load().type(Temperature.class).list().get(id);
-			PostTemperature postTemperatureData = new PostTemperature(temperatureData.irkit_id, temperatureData.signal_name, temperatureData.signal_content);
-			return postTemperatureData;
+			Temperature temperature = ObjectifyService.ofy().load().type(Temperature.class).list().get(id);
+			PostTemperature postTemperature = new PostTemperature(temperature.irkit_id, temperature.signal_name, temperature.signal_content);
+			return postTemperature;
 		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("temperatureData not found with an index: " + id);
+			throw new NotFoundException("temperature not found with an index: " + id);
 		}
 	}
 
-	@ApiMethod(path="get_all_temperature")
-	public ArrayList<PostTemperature> listTemperatureData() {
+	@ApiMethod(name = "temperature.get.all", path="temperature/all")
+	public ArrayList<PostTemperature> listTemperature() {
 		// read from data store
-		ArrayList<PostTemperature> temperatureDataList = new ArrayList<PostTemperature>();
+		ArrayList<PostTemperature> temperatureList = new ArrayList<PostTemperature>();
 		List<Temperature> list = ObjectifyService.ofy().load().type(Temperature.class).list();
-		for (Temperature temperatureData : list) {
-			temperatureDataList.add(new PostTemperature(temperatureData.irkit_id, temperatureData.signal_name, temperatureData.signal_content));
+		for (Temperature temperature : list) {
+			temperatureList.add(new PostTemperature(temperature.irkit_id, temperature.signal_name, temperature.signal_content));
 		}
-		return temperatureDataList;
+		return temperatureList;
 	}
 	
 	/**
-	 * GET https://irkitrestapi.appspot.com/_ah/api/northbound/v1/get_latest_temperature
+	 * GET https://irkitrestapi.appspot.com/_ah/api/northbound/v1/temperature/latest
 	 * @return
 	 * @throws NotFoundException
 	 */
-	@ApiMethod(path="get_latest_temperature")
-	public PostTemperature getLatestTemperatureData() throws NotFoundException {
+	@ApiMethod(name = "temperature.get.latest", path="temperature/latest")
+	public PostTemperature getLatestTemperature() {
 		// read from data store
-		try {
-			Temperature temperatureData = ObjectifyService.ofy().load().type(Temperature.class).order("-date").first().now();
-			PostTemperature postTemperatureData = new PostTemperature(temperatureData.irkit_id, temperatureData.signal_name, temperatureData.signal_content);
-			return postTemperatureData;
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("temperatureData not found with an index: latest date");
+		Temperature temperature = ObjectifyService.ofy().load().type(Temperature.class).order("-date").first().now();
+		if (temperature == null) {
+			log.info("temperature not found with an index: latest date");
+			return null; // to do: does it make sense to return null? or shall return with error code?
 		}
+		PostTemperature postTemperature = new PostTemperature(temperature.irkit_id, temperature.signal_name,
+				temperature.signal_content);
+		return postTemperature;
 	}
 
-	/** 
-	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/posttemperaturedata/2
-	 * @param post_id
-	 * @param postTemperatureData
+	/** Temperature API
+	 * 
+	 * Report temperature every 10 mins
+	 *  
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/temperature
+	 * @param postTemperature
 	 * @return
-	 * "2" is post_id
 	 */
-	@ApiMethod(name = "temperature.post", httpMethod = "post")
-	public PostTemperature insertTemperatureData(@Named("post_id") String post_id, PostTemperature postTemperatureData) {
+	@ApiMethod(name = "temperature.post", path = "temperature", httpMethod = "post")
+	public PostTemperature insertTemperature(PostTemperature postTemperature) {
 
 		// begin data store
-		Temperature temperatureData;
+		Temperature temperature;
 
-		temperatureData = new Temperature(null, postTemperatureData.irkit_id, postTemperatureData.signal_name, postTemperatureData.signal_content);
+		temperature = new Temperature(postTemperature.irkit_id, postTemperature.signal_name, postTemperature.signal_content);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
 		// will immediately get a new page using redirect and we want the data
 		// to be present.
-		ObjectifyService.ofy().save().entity(temperatureData).now();
+		ObjectifyService.ofy().save().entity(temperature).now();
 
 		// end data store
 
 		PostTemperature response = new PostTemperature();
-		response.irkit_id = postTemperatureData.irkit_id;
-		response.signal_name = postTemperatureData.signal_name;
-		response.signal_content = postTemperatureData.signal_content;
+		response.irkit_id = postTemperature.irkit_id;
+		response.signal_name = postTemperature.signal_name;
+		response.signal_content = postTemperature.signal_content;
 
 		return response;
 	}
@@ -832,59 +841,59 @@ public class IRkitNorthBoundRestAPI {
 	 * **
 	 **/
 
-	public PostSchedule getScheduleData(@Named("id") Integer id) throws NotFoundException {
+	@ApiMethod(name = "schedule.get", path="schedule")
+	public PostSchedule getSchedule(@Named("id") Integer id) throws NotFoundException {
 		// read from data store
 		try {
-			Schedule scheduleData = ObjectifyService.ofy().load().type(Schedule.class).list().get(id);
-			PostSchedule postScheduleData = new PostSchedule(scheduleData.id, scheduleData.client_key, scheduleData.device_id, scheduleData.signal_id, scheduleData.repeat, scheduleData.hour_of_day, scheduleData.minute);
-			return postScheduleData;
+			Schedule schedule = ObjectifyService.ofy().load().type(Schedule.class).list().get(id);
+			PostSchedule postSchedule = new PostSchedule(schedule.id, schedule.client_key, schedule.device_id, schedule.signal_id, schedule.repeat, schedule.hour_of_day, schedule.minute);
+			return postSchedule;
 		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("scheduleData not found with an index: " + id);
+			throw new NotFoundException("schedule not found with an index: " + id);
 		}
 	}
 
-	@ApiMethod(path="get_all_schedule")
-	public ArrayList<PostSchedule> listScheduleData() {
+	@ApiMethod(name = "schedule.get.all", path="schedule/all")
+	public ArrayList<PostSchedule> listSchedule() {
 		// read from data store
-		ArrayList<PostSchedule> scheduleDataList = new ArrayList<PostSchedule>();
+		ArrayList<PostSchedule> scheduleList = new ArrayList<PostSchedule>();
 		List<Schedule> list = ObjectifyService.ofy().load().type(Schedule.class).list();
-		for (Schedule scheduleData : list) {
-			scheduleDataList.add(new PostSchedule(scheduleData.id, scheduleData.client_key, scheduleData.device_id, scheduleData.signal_id, scheduleData.repeat, scheduleData.hour_of_day, scheduleData.minute));
+		for (Schedule schedule : list) {
+			scheduleList.add(new PostSchedule(schedule.id, schedule.client_key, schedule.device_id, schedule.signal_id, schedule.repeat, schedule.hour_of_day, schedule.minute));
 		}
-		return scheduleDataList;
+		return scheduleList;
 	}
 	
 	/**
 	 * 
-	 * @param post_id
-	 * @param postScheduleData
+	 * @param postSchedule
 	 * @return
 	 * 
 	 * Testing Passed OK
 	 */
 	@ApiMethod(name = "schedule.post", httpMethod = "post")
-	public PostSchedule insertScheduleData(@Named("post_id") String post_id, PostSchedule postScheduleData) {
+	public PostSchedule insertSchedule(PostSchedule postSchedule) {
 
 		// begin data store
-		Schedule scheduleData;
+		Schedule schedule;
 
-		scheduleData = new Schedule(postScheduleData.client_key, postScheduleData.device_id, postScheduleData.signal_id, postScheduleData.repeat, postScheduleData.hour_of_day, postScheduleData.minute);
+		schedule = new Schedule(postSchedule.client_key, postSchedule.device_id, postSchedule.signal_id, postSchedule.repeat, postSchedule.hour_of_day, postSchedule.minute);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
 		// will immediately get a new page using redirect and we want the data
 		// to be present.
-		ObjectifyService.ofy().save().entity(scheduleData).now();
+		ObjectifyService.ofy().save().entity(schedule).now();
 
 		// end data store
 
 		PostSchedule response = new PostSchedule();
-		response.client_key = postScheduleData.client_key;
-		response.device_id = postScheduleData.device_id;
-		response.signal_id = postScheduleData.signal_id;
-		response.repeat = postScheduleData.repeat;
-		response.hour_of_day = postScheduleData.hour_of_day;
-		response.minute = postScheduleData.minute;
+		response.client_key = postSchedule.client_key;
+		response.device_id = postSchedule.device_id;
+		response.signal_id = postSchedule.signal_id;
+		response.repeat = postSchedule.repeat;
+		response.hour_of_day = postSchedule.hour_of_day;
+		response.minute = postSchedule.minute;
 
 		return response;
 	}
@@ -894,49 +903,50 @@ public class IRkitNorthBoundRestAPI {
 	 * **
 	 **/
 
-	public PostUser getUserData(@Named("id") Integer id) throws NotFoundException {
+	@ApiMethod(name = "user.get", path="user")
+	public PostUser getUser(@Named("id") Integer id) throws NotFoundException {
 		// read from data store
 		try {
-			MyUser userData = ObjectifyService.ofy().load().type(MyUser.class).list().get(id);
-			PostUser postUserData = new PostUser(userData.id, userData.name, userData.passwd, userData.client_key, userData.api_key, userData.email);
-			return postUserData;
+			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).list().get(id);
+			PostUser postUser = new PostUser(user.id, user.name, user.passwd, user.client_key, user.api_key, user.email);
+			return postUser;
 		} catch (IndexOutOfBoundsException e) {
 			throw new NotFoundException("User not found with an index: " + id);
 		}
 	}
 
-	@ApiMethod(path="get_all_user")
-	public ArrayList<PostUser> listUserData() {
+	@ApiMethod(name = "user.get.all", path="user/all")
+	public ArrayList<PostUser> listUser() {
 		// read from data store
-		ArrayList<PostUser> userDataList = new ArrayList<PostUser>();
+		ArrayList<PostUser> userList = new ArrayList<PostUser>();
 		List<MyUser> list = ObjectifyService.ofy().load().type(MyUser.class).list();
-		for (MyUser userData : list) {
-			userDataList.add(new PostUser(userData.id, userData.name, userData.passwd, userData.client_key, userData.api_key, userData.email));
+		for (MyUser user : list) {
+			userList.add(new PostUser(user.id, user.name, user.passwd, user.client_key, user.api_key, user.email));
 		}
-		return userDataList;
+		return userList;
 	}
 
 	@ApiMethod(name = "user.post", httpMethod = "post")
-	public PostUser insertUserData(@Named("post_id") String post_id, PostUser postUserData) {
+	public PostUser insertUser(PostUser postUser) {
 
 		// begin data store
-		MyUser userData;
+		MyUser user;
 
-		userData = new MyUser(postUserData.name, postUserData.passwd, postUserData.client_key, postUserData.api_key, postUserData.email);
+		user = new MyUser(postUser.name, postUser.passwd, postUser.client_key, postUser.api_key, postUser.email);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
 		// will immediately get a new page using redirect and we want the data
 		// to be present.
-		ObjectifyService.ofy().save().entity(userData).now();
+		ObjectifyService.ofy().save().entity(user).now();
 		// end data store
 
 		PostUser response = new PostUser();
-		response.name = postUserData.name;
-		response.passwd = postUserData.passwd;
-		response.client_key = postUserData.client_key;
-		response.api_key = postUserData.api_key;
-		response.email = postUserData.email;
+		response.name = postUser.name;
+		response.passwd = postUser.passwd;
+		response.client_key = postUser.client_key;
+		response.api_key = postUser.api_key;
+		response.email = postUser.email;
 
 		return response;
 	}
@@ -988,37 +998,43 @@ public class IRkitNorthBoundRestAPI {
 	@ApiMethod(path="devices")
 	public PostDevicesResponse postDevices(@Named("clientkey") String clientkey) throws NotFoundException {
 		
-		// devicekey is pre-generated by server, and then pushed to device, so that device will have a devicekey to communicate to server
-		String devicekey = ""; 
-		
-		// first authenticate the current user, and create the new device
-		try {	
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
-			// save the new device into device data store
-			String hostname = ""; // hostname is not known by now
-			
-			Key<Device> newkey = ObjectifyService.factory().allocateId(Device.class); // generate new unique key here, use data store key generator to avoid collision
-			devicekey = String.valueOf(newkey.getId());
+		PostDevicesResponse postDevicesResponse = new PostDevicesResponse();
 
-			Device device = new Device(hostname, devicekey, clientkey);
-			ObjectifyService.ofy().save().entity(device).now();
-						
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an clientkey: " + clientkey);
-		}	
+		// devicekey is pre-generated by server, and then pushed to device, so that device will have a devicekey to communicate to server
+		String devicekey; 
+		
+		// first authenticate the current user, and create the new device	
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
+		if (user == null) {
+			log.info("User not found with an clientkey: " + clientkey);
+			return postDevicesResponse; // to do: what error code shall be
+										// returned?
+		}
+		// save the new device into device data store
+		String hostname = ""; // hostname is not known by now
+
+		// Key<Device> newkey =
+		// ObjectifyService.factory().allocateId(Device.class); // generate new
+		// unique key here, use data store key generator to avoid collision
+		// devicekey = String.valueOf(newkey.getId());
+		devicekey = String.valueOf(UUID.randomUUID()); // objectify id is too
+														// short, use UUID
+														// instead
+		devicekey = devicekey.replaceAll("-", ""); // IRKit Device only supports
+													// 32 chars UUID, removes
+													// all "-"
+		devicekey = devicekey.toUpperCase(); // Shall convert to upper case for
+												// successful IRKit Device CRC
+												// check
+
+		Device device = new Device(hostname, devicekey, clientkey);
+		ObjectifyService.ofy().save().entity(device).now();
 		
 		// then, return the devicekey and deviceid to client app
-		PostDevicesResponse postDevicesResponse = new PostDevicesResponse();
-		postDevicesResponse.devicekey = devicekey;			
-		try {
-			Long ldeviceid = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now().id;
-			postDevicesResponse.deviceid = String.valueOf(ldeviceid);
-			// this method only has success response
-			return postDevicesResponse;
-		}
-		catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("Device not found with an devicekey: " + devicekey);
-		}	
+		postDevicesResponse.devicekey = devicekey;
+		postDevicesResponse.deviceid = String.valueOf(device.id);
+		// this method only has success response
+		return postDevicesResponse;
 	}
 	
 	
@@ -1086,35 +1102,43 @@ public class IRkitNorthBoundRestAPI {
 		// is no User, for example, you could choose to return a
 		// not-authenticated error or perform some other desired action.
 		if (user == null) {
-			return null;
+			log.info("user is null!");
+			return null; // make sense to return null? shall return error code?
 		}
 		
-		MyUser userData;
+		MyUser myuser;
 		
 		// load the user data
-		userData = ObjectifyService.ofy().load().type(MyUser.class).filter("email", user.getEmail()).first().now();
+		myuser = ObjectifyService.ofy().load().type(MyUser.class).filter("email", user.getEmail()).first().now();
 			
-		if (userData == null){
+		if (myuser == null){
 			// if the email has NOT been registered into cloud data store, register new user in the cloud server
 			
 			// begin data store
 			String passwd = "";
-			Key<MyUser> newkey1 = ObjectifyService.factory().allocateId(MyUser.class); // generate new unique key here, use data store key generator to avoid collision
-			String client_key = String.valueOf(newkey1.getId());
-			Key<MyUser> newkey2 = ObjectifyService.factory().allocateId(MyUser.class); // generate new unique key here, use data store key generator to avoid collision
-			String api_key = String.valueOf(newkey2.getId());
-			userData = new MyUser(user.getNickname(), passwd, client_key, api_key, user.getEmail());
+			
+			String client_key = String.valueOf(UUID.randomUUID()); // objectify id is too short, use UUID instead
+			client_key = client_key.replaceAll("-", "");	// IRKit Device only supports 32 chars UUID, removes all "-"
+			client_key = client_key.toUpperCase();
+			
+			String api_key = String.valueOf(UUID.randomUUID()); // objectify id is too short, use UUID instead
+			api_key = api_key.replaceAll("-", "");	// IRKit Device only supports 32 chars UUID, removes all "-"
+			api_key = api_key.toUpperCase();
+
+			log.info("user doesn't exist, create new user with email: " + user.getEmail());
+			myuser = new MyUser(user.getNickname(), passwd, client_key, api_key, user.getEmail());
 
 			// Use Objectify to save the greeting and now() is used to make the call
 			// synchronously as we
 			// will immediately get a new page using redirect and we want the data to be present.
-			ObjectifyService.ofy().save().entity(userData).now();
+			ObjectifyService.ofy().save().entity(user).now();
 			// end data store
 		}					
 		
+		log.info("existing user found with email: " + user.getEmail());
 		// this method only has success response
-		PostUser postUserData = new PostUser(userData.id, userData.name, userData.passwd, userData.client_key, userData.api_key, userData.email);
-		return postUserData;
+		PostUser postUser = new PostUser(myuser.id, myuser.name, myuser.passwd, myuser.client_key, myuser.api_key, myuser.email);
+		return postUser;
 	}
 	
 	/**
@@ -1153,20 +1177,22 @@ public class IRkitNorthBoundRestAPI {
         public String message;
     }
 	@ApiMethod(path="apps")
-	public PostAppsResponse postApps(@Named("email") String email) throws NotFoundException {
+	public PostAppsResponse postApps(@Named("email") String email) {
+
+		PostAppsResponse postAppsResponse = new PostAppsResponse();
 
 		// find out the current user from data store
-		try {
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("email", email).first().now();
-			// response
-			// to do: need send email here
-			PostAppsResponse postAppsResponse = new PostAppsResponse();
-			postAppsResponse.message = user.api_key;
-			// this method only has success response
-			return postAppsResponse;
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an email: " + email);
-		}		
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("email", email).first().now();
+		if (user == null) {
+			log.info("User not found with an email: " + email);
+			return postAppsResponse; // to do: what error code shall be
+										// returned?
+		}
+		// response
+		// to do: need send email here
+		postAppsResponse.message = user.api_key;
+		// this method only has success response
+		return postAppsResponse;
 	}
 	
 	/**
@@ -1203,18 +1229,20 @@ public class IRkitNorthBoundRestAPI {
         public String clientkey;
     }
 	@ApiMethod(path="clients")
-	public PostClientsResponse postClients(@Named("apikey") String apikey) throws NotFoundException {
-		
+	public PostClientsResponse postClients(@Named("apikey") String apikey) {
+
+		PostClientsResponse postClientsResponse = new PostClientsResponse();
+
 		// find out the current user from data store
-		try {
-			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("api_key", apikey).first().now();
-			PostClientsResponse postClientsResponse = new PostClientsResponse();
-			postClientsResponse.clientkey = user.client_key;
-			// this method only has success response
-			return postClientsResponse;
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("User not found with an apikey: " + apikey);
-		}		
+		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("api_key", apikey).first().now();
+		if (user == null) {
+			log.info("User not found with an apikey: " + apikey);
+			return postClientsResponse; // to do: what error code shall be
+										// returned?
+		}
+		postClientsResponse.clientkey = user.client_key;
+		// this method only has success response
+		return postClientsResponse;
 	}
 	
 	
@@ -1263,40 +1291,52 @@ public class IRkitNorthBoundRestAPI {
         public String clientkey;
     }
 	@ApiMethod(path="keys")
-	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key) throws NotFoundException {
+	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key) {
+
+		PostKeysResponse postKeysResponse = new PostKeysResponse();
 
 		// clienttoken = devicekey here, see Southbound API "postKeys" implementation.
 		
-		// first authenticate the user, in case "clientkey" is provided in the request
+		// first authenticate the user, in case "clientkey" is provided in the
+		// request
 		if (!client_key.isEmpty()) {
-			try {
-				MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", client_key).first().now();
-
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("User not found with an clientkey: " + client_key);
+			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", client_key).first()
+					.now();
+			if (user == null) {
+				log.info("User not found with an clientkey: " + client_key);
+				return postKeysResponse; // to do: what error code shall be
+											// returned?
 			}
 		}
 				
 		// find out the current device from data store
-		try {
-			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", clienttoken).first().now();
-			PostKeysResponse postKeysResponse = new PostKeysResponse();
+		Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", clienttoken).first()
+				.now();
+		if (device != null) {
 			postKeysResponse.deviceid = String.valueOf(device.id);
-			postKeysResponse.clientkey = device.client_key;		
-			// here, if clientkey and device.client_key is different, new clientkey will be applied and saved into data store => i.e. device user is changed!
+			postKeysResponse.clientkey = device.client_key;
+			// here, if clientkey and device.client_key is different, new
+			// clientkey will be applied and saved into data store => i.e.
+			// device user is changed!
 			if (!client_key.isEmpty() && client_key != device.client_key) {
 				postKeysResponse.clientkey = client_key;
 				device.client_key = client_key;
-				ObjectifyService.ofy().save().entity(device).now(); // save the new device-user relationship into data store!
+				ObjectifyService.ofy().save().entity(device).now(); // save the
+																	// new
+																	// device-user
+																	// relationship
+																	// into data
+																	// store!
 			}
 			// this method only has success response
 			return postKeysResponse;
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("Device not found with a clienttoken: " + clienttoken);
+		} else {
+			log.info("Device not found with a clienttoken: " + clienttoken);
+			return postKeysResponse; // to do: what error code shall be
+										// returned?
 		}
-
 	}
-	
+
 }
 
 

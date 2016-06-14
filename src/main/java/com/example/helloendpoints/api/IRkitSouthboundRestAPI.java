@@ -75,19 +75,20 @@ public class IRkitSouthboundRestAPI {
 	class PostDoorResponse {
     }
 	@ApiMethod(path="door")
-	public void postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname) throws NotFoundException {
+	public void postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname) {
 		
+		log.info("Post Door request is received on southbound interface."); 
+
 		// first find out the device from data store
-		try {
-			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+		Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+		if (device != null) {
 			// then save the hostname into device into data store
 			device.hostname = hostname;
-			ObjectifyService.ofy().save().entity(device).now();	
-			
+			ObjectifyService.ofy().save().entity(device).now();
 			return;
-
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("Device not found with an devicekey: " + devicekey);
+		} else {
+			log.info("Device not found with an devicekey: " + devicekey);
+			return; // to do: shall return a specific error code?
 		}
 		
 		// Always return 200 here?
@@ -161,8 +162,10 @@ public class IRkitSouthboundRestAPI {
         						// "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3}"
     }
 	@ApiMethod(path="messages")
-	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") long newer_than) throws NotFoundException {
+	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") long newer_than) {
 		
+		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
+
 		// get the latest message for this device_key
 		// first, get the device instance, either from an existing device list, or
 		// create new device into the device list if not existing
@@ -177,18 +180,21 @@ public class IRkitSouthboundRestAPI {
 			}
 		}
 		if (index == -1) { // if device doesn't exist in the list
-			try {
-				Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+
+			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first()
+					.now();
+			if (device != null) {
 				postdevice = new PostDevice(device.id, device.hostname, device.device_key, device.client_key);
 				postDeviceList.add(postdevice);
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("Device not found with an devicekey: " + devicekey);
+			} else {
+				log.info("Device not found with an devicekey: " + devicekey);
+				return getMessagesResponse; // to do: shall return a specific
+											// error code?
 			}
 		} else {
 			postdevice = postDeviceList.get(index);
 		}
 		
-		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
 
 		log.info("before consume, postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 		// Loop, check if there is message (actuation commands) buffered on server for this device
@@ -259,7 +265,7 @@ public class IRkitSouthboundRestAPI {
 	class PostMessagesResponse {
     }
 	@ApiMethod(path="messages")
-	public void postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body) throws NotFoundException {
+	public void postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body) {
 		
 		// first, get the device instance, either from an existing device list,
 		// or create new device into the device list if not existing
@@ -272,12 +278,14 @@ public class IRkitSouthboundRestAPI {
 			}
 		}
 		if (deviceindex == -1) { // if device doesn't exist in the list
-			try {
-				Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first()
+					.now();
+			if (device != null) {
 				postdevice = new PostDevice(device.id, device.hostname, device.device_key, device.client_key);
 				postDeviceList.add(postdevice);
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("Device not found with an devicekey: " + devicekey);
+			} else {
+				log.info("Device not found with an devicekey: " + devicekey);
+				return; // to do: shall return a specific error code?
 			}
 		} else {
 			postdevice = postDeviceList.get(deviceindex);
@@ -294,12 +302,15 @@ public class IRkitSouthboundRestAPI {
 			}
 		}
 		if (userindex == -1) { // if user doesn't exist in the list
-			try {
-				MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", postdevice.client_key).first().now();
+
+			MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", postdevice.client_key)
+					.first().now();
+			if (user != null) {
 				postuser = new PostUser(user.id, user.name, user.passwd, user.client_key, user.api_key, user.email);
 				IRkitNorthBoundRestAPI.postUserList.add(postuser);
-			} catch (IndexOutOfBoundsException e) {
-				throw new NotFoundException("User not found with an postdevice.client_key: " + postdevice.client_key);
+			} else {
+				log.info("User not found with an postdevice.client_key: " + postdevice.client_key);
+				return; // to do: shall return a specific error code?
 			}
 		} else {
 			postuser = IRkitNorthBoundRestAPI.postUserList.get(userindex);
@@ -329,7 +340,7 @@ public class IRkitSouthboundRestAPI {
 		 * 1) { gs.write(","); } } gs.write("]}"); gs.writeEnd();
 		 */
 
-		// response
+		// success response
 		return;
 	}
 		
@@ -341,27 +352,34 @@ public class IRkitSouthboundRestAPI {
 
 	
 	/** Temperature API
-	 * **
-	 **/
-	@ApiMethod(name = "temperature.post", httpMethod = "post")
-	public PostTemperature insertTemperatureData(@Named("post_id") String post_id, PostTemperature postTemperatureData) {
-		// begin data store
-		Temperature temperatureData;
+	 * 
+	 * Report temperature every 10 mins
+	 *  
+	 * POST https://irkitrestapi.appspot.com/_ah/api/northbound/v1/temperature
+	 * @param postTemperature
+	 * @return
+	 */
+	@ApiMethod(name = "temperature.post", path = "temperature", httpMethod = "post")
+	public PostTemperature insertTemperature(PostTemperature postTemperature) {
 
-		temperatureData = new Temperature(null, postTemperatureData.irkit_id, postTemperatureData.signal_name,
-				postTemperatureData.signal_content);
+		log.info("Post temperature request is received on southbound interface."); 
+		// begin data store
+		Temperature temperature;
+
+		temperature = new Temperature(postTemperature.irkit_id, postTemperature.signal_name, postTemperature.signal_content);
 
 		// Use Objectify to save the greeting and now() is used to make the call
 		// synchronously as we
 		// will immediately get a new page using redirect and we want the data
 		// to be present.
-		ObjectifyService.ofy().save().entity(temperatureData).now();
+		ObjectifyService.ofy().save().entity(temperature).now();
+
 		// end data store
 
 		PostTemperature response = new PostTemperature();
-		response.irkit_id = postTemperatureData.irkit_id;
-		response.signal_name = postTemperatureData.signal_name;
-		response.signal_content = postTemperatureData.signal_content;
+		response.irkit_id = postTemperature.irkit_id;
+		response.signal_name = postTemperature.signal_name;
+		response.signal_content = postTemperature.signal_content;
 
 		return response;
 	}
@@ -430,16 +448,27 @@ public class IRkitSouthboundRestAPI {
         							// the clienttoken uniquely identify both a devicekey and clientkey
     }
 	@ApiMethod(path="keys")
-    public PostKeysResponse postKeys(@Named("devicekey") String devicekey) throws NotFoundException {
-		// first find out the device from data store
-		try {
-			Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
-			PostKeysResponse postKeysResponse = new PostKeysResponse();
-			postKeysResponse.clienttoken = device.device_key;	// actually, we can just use devicekey as clienttoken, seems OK, devicekey can identify both a devicekey and clientkey
-			return postKeysResponse;
+    public PostKeysResponse postKeys(@Named("devicekey") String devicekey) {
+		
+		PostKeysResponse postKeysResponse = new PostKeysResponse();
 
-		} catch (IndexOutOfBoundsException e) {
-			throw new NotFoundException("Device not found with an devicekey: " + devicekey);
+		// first find out the device from data store
+		Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
+		if (device != null) {
+			postKeysResponse.clienttoken = device.device_key; // actually, we
+																// can just use
+																// devicekey as
+																// clienttoken,
+																// seems OK,
+																// devicekey can
+																// identify both
+																// a devicekey
+																// and clientkey
+			return postKeysResponse;
+		} else {
+			log.info("Device not found with an devicekey: " + devicekey);
+			return postKeysResponse; // to do: shall return a specific error
+										// code?
 		}
 
 	}
