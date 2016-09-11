@@ -70,29 +70,27 @@ public class IRkitSouthboundRestAPI {
 	 * 
 	 * Testing Passed OK
 	 * POST https://irkitrestapi.appspot.com/_ah/api/southbound/v1/door?devicekey=3020001&hostname=IRKitXXXX
-	 * Returned 204 OK Response
+	 * Returned 200 OK Response
 	 */
 	class PostDoorResponse {
     }
 	@ApiMethod(path="door")
-	public void postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname) {
+	public PostDoorResponse postDoor(@Named("devicekey") String devicekey, @Named("hostname") String hostname) throws NotFoundException {
 		
 		log.info("Post Door request is received on southbound interface."); 
-
+		PostDoorResponse postDoorResponse = new PostDoorResponse();
+		
 		// first find out the device from data store
 		Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
 		if (device != null) {
 			// then save the hostname into device into data store
 			device.hostname = hostname;
 			ObjectifyService.ofy().save().entity(device).now();
-			return;
+			return postDoorResponse;
 		} else {
 			log.info("Device not found with an devicekey: " + devicekey);
-			return; // to do: shall return a specific error code?
+			throw new NotFoundException("Device not found with an devicekey: " + devicekey); 
 		}
-		
-		// Always return 200 here?
-		// How Appengine return all the response code above?
 	}
 	
 	
@@ -162,7 +160,7 @@ public class IRkitSouthboundRestAPI {
         						// "{\"format\":\"raw\",\"freq\":38,\"data\":[50489,9039,1205,1127],\"id\":3}"
     }
 	@ApiMethod(path="messages")
-	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") long newer_than) {
+	public GetMessagesResponse getMessages(@Named("devicekey") String devicekey, @Named("newer_than") long newer_than) throws NotFoundException {
 		
 		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
 
@@ -188,8 +186,7 @@ public class IRkitSouthboundRestAPI {
 				postDeviceList.add(postdevice);
 			} else {
 				log.info("Device not found with an devicekey: " + devicekey);
-				return getMessagesResponse; // to do: shall return a specific
-											// error code?
+				throw new NotFoundException("Device not found with an devicekey: " + devicekey);
 			}
 		} else {
 			postdevice = postDeviceList.get(index);
@@ -218,7 +215,7 @@ public class IRkitSouthboundRestAPI {
 		}
 		log.info("after consume, postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 			
-		// this method shall only provide success response
+		// success response
 		return getMessagesResponse;
 	}
 	
@@ -260,12 +257,14 @@ public class IRkitSouthboundRestAPI {
 	 * 
 	 * Testing Passed OK
 	 * POST https://irkitrestapi.appspot.com/_ah/api/southbound/v1/messages?body=%7B%5C%22format%5C%22%3A%5C%22raw%5C%22%2C%5C%22freq%5C%22%3A38%2C%5C%22data%5C%22%3A%5B18031%2C8755%2C1190%2C1190%2C1190%5D%7D&devicekey=1060001&freq=38
-	 * Returned 204 Response
+	 * Returned 200 Response
 	 */
 	class PostMessagesResponse {
     }
 	@ApiMethod(path="messages")
-	public void postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body) {
+	public PostMessagesResponse postMessages(@Named("devicekey") String devicekey, @Named("freq") float freq, @Named("body") String body) throws NotFoundException {
+		
+		PostMessagesResponse postMessagesResponse = new PostMessagesResponse();
 		
 		// first, get the device instance, either from an existing device list,
 		// or create new device into the device list if not existing
@@ -285,7 +284,7 @@ public class IRkitSouthboundRestAPI {
 				postDeviceList.add(postdevice);
 			} else {
 				log.info("Device not found with an devicekey: " + devicekey);
-				return; // to do: shall return a specific error code?
+				throw new NotFoundException("Device not found with an devicekey: " + devicekey);
 			}
 		} else {
 			postdevice = postDeviceList.get(deviceindex);
@@ -310,7 +309,7 @@ public class IRkitSouthboundRestAPI {
 				IRkitNorthBoundRestAPI.postUserList.add(postuser);
 			} else {
 				log.info("User not found with an postdevice.client_key: " + postdevice.client_key);
-				return; // to do: shall return a specific error code?
+				throw new NotFoundException("User not found with an postdevice.client_key: " + postdevice.client_key);
 			}
 		} else {
 			postuser = IRkitNorthBoundRestAPI.postUserList.get(userindex);
@@ -341,7 +340,7 @@ public class IRkitSouthboundRestAPI {
 		 */
 
 		// success response
-		return;
+		return postMessagesResponse;
 	}
 		
 	
@@ -448,27 +447,18 @@ public class IRkitSouthboundRestAPI {
         							// the clienttoken uniquely identify both a devicekey and clientkey
     }
 	@ApiMethod(path="keys")
-    public PostKeysResponse postKeys(@Named("devicekey") String devicekey) {
+    public PostKeysResponse postKeys(@Named("devicekey") String devicekey) throws NotFoundException {
 		
 		PostKeysResponse postKeysResponse = new PostKeysResponse();
 
 		// first find out the device from data store
 		Device device = ObjectifyService.ofy().load().type(Device.class).filter("device_key", devicekey).first().now();
 		if (device != null) {
-			postKeysResponse.clienttoken = device.device_key; // actually, we
-																// can just use
-																// devicekey as
-																// clienttoken,
-																// seems OK,
-																// devicekey can
-																// identify both
-																// a devicekey
-																// and clientkey
+			postKeysResponse.clienttoken = device.device_key; // actually, we can just use devicekey as clienttoken, seems OK, devicekey can identify both a devicekey and clientkey
 			return postKeysResponse;
 		} else {
 			log.info("Device not found with an devicekey: " + devicekey);
-			return postKeysResponse; // to do: shall return a specific error
-										// code?
+			throw new NotFoundException("Device not found with an devicekey: " + devicekey);
 		}
 
 	}

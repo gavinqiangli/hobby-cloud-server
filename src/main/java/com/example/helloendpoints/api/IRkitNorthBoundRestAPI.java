@@ -40,6 +40,45 @@ import org.json.JSONObject;
 		Constants.API_EXPLORER_CLIENT_ID }, audiences = { Constants.ANDROID_AUDIENCE })
 public class IRkitNorthBoundRestAPI {
 	
+	/**
+	 * Exceptions Provided by Google Cloud Endpoints
+	 * https://cloud.google.com/appengine/docs/java/endpoints/exceptions
+	 * 
+	 * You can send such common HTTP status codes by throwing an exception provided by the endpoints library as follows:
+	 * throw new NotFoundException(user.getEmail());
+	 * 
+	 * Exception Corresponding HTTP Status Code
+	 * com.google.api.server.spi.response.BadRequestException HTTP 400
+	 * com.google.api.server.spi.response.UnauthorizedException HTTP 401
+	 * com.google.api.server.spi.response.ForbiddenException HTTP 403
+	 * com.google.api.server.spi.response.NotFoundException HTTP 404
+	 * com.google.api.server.spi.response.ConflictException HTTP 409
+	 * com.google.api.server.spi.response.InternalServerErrorException HTTP 500
+	 * com.google.api.server.spi.response.ServiceUnavailableException HTTP 503
+	 * 
+	 * Supported HTTP Status Codes
+	 * HTTP Status Codes Support 
+	 * 
+	 * HTTP 2xx 
+	 * HTTP 200 is typically assumed by
+	 * Endpoints if the API method returns successfully. If the API method
+	 * response type is void or the return value of the API method is null ,
+	 * HTTP 204 will be set instead. HTTP 2xx codes should not be used in custom
+	 * exception classes. 
+	 * 
+	 * HTTP 3xx 
+	 * HTTP 3xx codes are not supported. Use of any
+	 * HTTP 3xx codes will result in an HTTP 404 response. 
+	 * 
+	 * HTTP 4xx 
+	 * Only the HTTP 4xx codes listed below are supported: 400 401 403 404 409 410 412
+	 * 413 Any other HTTP 4xx codes will be returned as error 404, except for
+	 * the following: 405 is returned as 501 408 is returned as 503 
+	 * 
+	 * HTTP 5xx 
+	 * All HTTP 5xx status codes are converted to be HTTP 503 in the client
+	 * response.
+	 */
 
 	/**
 	 * Saved in the memory, should be cleared after a scheduled time period in order to release memory. 
@@ -110,8 +149,7 @@ public class IRkitNorthBoundRestAPI {
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
 		if (user == null) {
 			log.info("User not found with an clientkey: " + clientkey);
-			return postDoorResponse; // to do: what error code shall be
-										// returned?
+			throw new NotFoundException("User not found with an clientkey: " + clientkey); 
 		}
 		
 		// convert string id to long id 
@@ -148,7 +186,7 @@ public class IRkitNorthBoundRestAPI {
 	 * right now it is registered/bound per User
 	 */
 	@ApiMethod(path="messages_v2")
-	public PostSignal getMessagesV2(@Named("clientkey") String clientkey) {
+	public PostSignal getMessagesV2(@Named("clientkey") String clientkey) throws NotFoundException {
 		
 		PostSignal postsignal = new PostSignal();
 
@@ -170,7 +208,7 @@ public class IRkitNorthBoundRestAPI {
 				postUserList.add(postuser);
 			} else {
 				log.info("User not found with an clientkey: " + clientkey);
-				return postsignal; // to do: what error code shall be returned? 
+				throw new NotFoundException("User not found with an clientkey: " + clientkey);
 			}
 		} else {
 			postuser = postUserList.get(index);
@@ -235,8 +273,7 @@ public class IRkitNorthBoundRestAPI {
 			return postsignal;
 		}
 		
-		// failure response
-		return postsignal; // to do: doesn't make sense to return null, but what error code shall be returned?
+		return null; // return null response, client app will retry
 	}
 	
 	/**
@@ -298,9 +335,6 @@ public class IRkitNorthBoundRestAPI {
         public String deviceid;
     }
 	@ApiMethod(path="messages")
-    // void getMessages(@QueryMap Map<String, String> params, Callback<GetMessagesResponse> callback);
-	// to do: client app need to change to json format for sending the request
-	// to do: check how the callback response works, i.e. how to callback
 	public GetMessagesResponse getMessages(@Named("clientkey") String clientkey, @Named("clear") String clear) throws NotFoundException {
 		
 		GetMessagesResponse getMessagesResponse = new GetMessagesResponse();
@@ -323,8 +357,7 @@ public class IRkitNorthBoundRestAPI {
 				postUserList.add(postuser);
 			} else {
 				log.info("User not found with an clientkey: " + clientkey);
-				return getMessagesResponse; // to do: what error code shall be
-											// returned?
+				throw new NotFoundException("User not found with an clientkey: " + clientkey); 
 			}
 		} else {
 			postuser = postUserList.get(index);
@@ -402,9 +435,7 @@ public class IRkitNorthBoundRestAPI {
 				throw new NotFoundException("Device not found with an postuser.newSignalMessage.device_id: " + postuser.newSignalMessage.device_id);
 			}
 		}
-		
-		// failure response ???
-		return getMessagesResponse; // to do: what error code shall be returned?
+		return null; // return null response, client app will retry
 	}
 	
 	
@@ -461,24 +492,26 @@ public class IRkitNorthBoundRestAPI {
 	 * public void failure(RetrofitError error) { // Error} }); 
 	 * </code></pre></p>
 	 */
-	class PostMessagesResponse {
+	class PostMessagesResponse{
     }
 	/** Method v1
 	 * Client app send the message body. Server is transparently passing message body, from client app to the device.
-	 * Signal ID is unknown.
+	 * Signal ID is unknown.PostMessagesResponse
 	 * This method is not good for server side data mining.
 	 * 
 	 * Testing Passed OK
 	 * Input Message format should be without \, so: message={"format":"raw","freq":38,"data":[18031,8755,1190,1190,1190]}
 	 */
 	@ApiMethod(path="messages")		
-	public void postMessages(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("message") String message) throws NotFoundException {
+	public PostMessagesResponse postMessages(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("message") String message) throws NotFoundException {
+		
+		PostMessagesResponse postMessagesResponse = new PostMessagesResponse();
 		
 		// 1. first authenticate the user
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
 		if (user == null) {
 			log.info("User not found with an clientkey: " + clientkey);
-			return; // to do: what error code shall be returned?
+			throw new NotFoundException("User not found with an clientkey: " + clientkey);
 		}
 
 		// 2. store all server-sent Messages (actuation commands) on Server side data base, for data mining purpose
@@ -538,8 +571,7 @@ public class IRkitNorthBoundRestAPI {
 		// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall
 		// send the getMessages response to the device, including the
 		// post_signal
-		return;
-		// failure response ????? to do: check android client implementation how to handle failure
+		return postMessagesResponse;
 	}
 	
 	/** Method v2
@@ -549,13 +581,15 @@ public class IRkitNorthBoundRestAPI {
 	 * Returned 200OK Response
 	 */
 	@ApiMethod(path="messages_v2")
-	public void postMessagesV2(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("signalid") String signalid) throws NotFoundException {
+	public PostMessagesResponse postMessagesV2(@Named("clientkey") String clientkey, @Named("deviceid") String deviceid, @Named("signalid") String signalid) throws NotFoundException {
+		
+		PostMessagesResponse postMessagesResponse = new PostMessagesResponse();
 		
 		// 1. first authenticate the user
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
 		if (user == null) {
 			log.info("User not found with an client_key: " + clientkey);
-			return; // to do: what error code shall be returned?
+			throw new NotFoundException("User not found with an clientkey: " + clientkey);
 		}
 		
 		// 2. store the Message on Server data store
@@ -639,9 +673,7 @@ public class IRkitNorthBoundRestAPI {
 		log.info("postdevice.transparentMessageBuffer.size() = " + String.valueOf(postdevice.transparentMessageBuffer.size()));
 		log.info("postmessage.seq_id = " + String.valueOf(postmessage.seq_id));
 		// 5. success response. Meanwhile the "IRkitSouthboundRestAPI" shall send the getMessages response to the device, including the post_signal
-		return;
-				
-		// failure response ????? to do: check android client implementation how to handle failure
+		return postMessagesResponse;			
 	}
 	
 	
@@ -728,7 +760,7 @@ public class IRkitNorthBoundRestAPI {
 	}
 	
 	/**
-	 * to do: client app needs to all this api after giving a new signal name
+	 * to do: client app needs to call this api after giving a new signal name
 	 * 
 	 * After learning a new signal, end user shall give a name for the signal on client app, 
 	 * and then client app shall call server api to store the signal name on server data store
@@ -792,12 +824,12 @@ public class IRkitNorthBoundRestAPI {
 	 * @throws NotFoundException
 	 */
 	@ApiMethod(name = "temperature.get.latest", path="temperature/latest")
-	public PostTemperature getLatestTemperature() {
+	public PostTemperature getLatestTemperature() throws NotFoundException {
 		// read from data store
 		Temperature temperature = ObjectifyService.ofy().load().type(Temperature.class).order("-date").first().now();
 		if (temperature == null) {
 			log.info("temperature not found with an index: latest date");
-			return null; // to do: does it make sense to return null? or shall return with error code?
+			throw new NotFoundException("temperature not found with an index: latest date");
 		}
 		PostTemperature postTemperature = new PostTemperature(temperature.irkit_id, temperature.signal_name,
 				temperature.signal_content);
@@ -1007,8 +1039,7 @@ public class IRkitNorthBoundRestAPI {
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("client_key", clientkey).first().now();
 		if (user == null) {
 			log.info("User not found with an clientkey: " + clientkey);
-			return postDevicesResponse; // to do: what error code shall be
-										// returned?
+			throw new NotFoundException("User not found with an clientkey: " + clientkey); 
 		}
 		// save the new device into device data store
 		String hostname = ""; // hostname is not known by now
@@ -1177,7 +1208,7 @@ public class IRkitNorthBoundRestAPI {
         public String message;
     }
 	@ApiMethod(path="apps")
-	public PostAppsResponse postApps(@Named("email") String email) {
+	public PostAppsResponse postApps(@Named("email") String email) throws NotFoundException {
 
 		PostAppsResponse postAppsResponse = new PostAppsResponse();
 
@@ -1185,8 +1216,7 @@ public class IRkitNorthBoundRestAPI {
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("email", email).first().now();
 		if (user == null) {
 			log.info("User not found with an email: " + email);
-			return postAppsResponse; // to do: what error code shall be
-										// returned?
+			throw new NotFoundException("User not found with an email: " + email); 
 		}
 		// response
 		// to do: need send email here
@@ -1229,7 +1259,7 @@ public class IRkitNorthBoundRestAPI {
         public String clientkey;
     }
 	@ApiMethod(path="clients")
-	public PostClientsResponse postClients(@Named("apikey") String apikey) {
+	public PostClientsResponse postClients(@Named("apikey") String apikey) throws NotFoundException {
 
 		PostClientsResponse postClientsResponse = new PostClientsResponse();
 
@@ -1237,8 +1267,7 @@ public class IRkitNorthBoundRestAPI {
 		MyUser user = ObjectifyService.ofy().load().type(MyUser.class).filter("api_key", apikey).first().now();
 		if (user == null) {
 			log.info("User not found with an apikey: " + apikey);
-			return postClientsResponse; // to do: what error code shall be
-										// returned?
+			throw new NotFoundException("User not found with an apikey: " + apikey);
 		}
 		postClientsResponse.clientkey = user.client_key;
 		// this method only has success response
@@ -1291,7 +1320,7 @@ public class IRkitNorthBoundRestAPI {
         public String clientkey;
     }
 	@ApiMethod(path="keys")
-	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key) {
+	public PostKeysResponse postKeys(@Named("clienttoken") String clienttoken, @Named("client_key") String client_key) throws NotFoundException {
 
 		PostKeysResponse postKeysResponse = new PostKeysResponse();
 
@@ -1304,8 +1333,7 @@ public class IRkitNorthBoundRestAPI {
 					.now();
 			if (user == null) {
 				log.info("User not found with an clientkey: " + client_key);
-				return postKeysResponse; // to do: what error code shall be
-											// returned?
+				throw new NotFoundException("User not found with an clientkey: " + client_key); 
 			}
 		}
 				
@@ -1332,8 +1360,7 @@ public class IRkitNorthBoundRestAPI {
 			return postKeysResponse;
 		} else {
 			log.info("Device not found with a clienttoken: " + clienttoken);
-			return postKeysResponse; // to do: what error code shall be
-										// returned?
+			throw new NotFoundException("Device not found with a clienttoken: " + clienttoken);
 		}
 	}
 

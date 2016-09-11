@@ -49,6 +49,22 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
+    "southbound.temperature.post" : {
+      "path" : "temperature",
+      "httpMethod" : "post",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
+      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperature",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "southbound.iRkitSouthboundRestAPI.postDoor" : {
       "path" : "door",
       "httpMethod" : "POST",
@@ -71,7 +87,7 @@
         "body" : "empty"
       },
       "response" : {
-        "body" : "empty"
+        "body" : "autoTemplate(backendResponse)"
       }
     },
     "southbound.iRkitSouthboundRestAPI.postMessages" : {
@@ -100,7 +116,7 @@
         "body" : "empty"
       },
       "response" : {
-        "body" : "empty"
+        "body" : "autoTemplate(backendResponse)"
       }
     },
     "southbound.iRkitSouthboundRestAPI.postKeys" : {
@@ -123,22 +139,6 @@
       "response" : {
         "body" : "autoTemplate(backendResponse)"
       }
-    },
-    "southbound.temperature.post" : {
-      "path" : "temperature",
-      "httpMethod" : "post",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com" ],
-      "clientIds" : [ "954883670747-97hg3kq6ordt58k9cinkc29tg6jvso37.apps.googleusercontent.com", "replace this with your Android client ID", "replace this with your iOS client ID", "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperature",
-      "request" : {
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
     }
   },
   "descriptor" : {
@@ -148,15 +148,6 @@
         "type" : "object",
         "properties" : {
           "message" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PostKeysResponse" : {
-        "id" : "PostKeysResponse",
-        "type" : "object",
-        "properties" : {
-          "clienttoken" : {
             "type" : "string"
           }
         }
@@ -175,6 +166,27 @@
             "type" : "string"
           }
         }
+      },
+      "PostDoorResponse" : {
+        "id" : "PostDoorResponse",
+        "type" : "object",
+        "properties" : {
+        }
+      },
+      "PostMessagesResponse" : {
+        "id" : "PostMessagesResponse",
+        "type" : "object",
+        "properties" : {
+        }
+      },
+      "PostKeysResponse" : {
+        "id" : "PostKeysResponse",
+        "type" : "object",
+        "properties" : {
+          "clienttoken" : {
+            "type" : "string"
+          }
+        }
       }
     },
     "methods" : {
@@ -183,21 +195,27 @@
           "$ref" : "GetMessagesResponse"
         }
       },
-      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postDoor" : {
-      },
-      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postMessages" : {
-      },
-      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postKeys" : {
-        "response" : {
-          "$ref" : "PostKeysResponse"
-        }
-      },
       "com.example.helloendpoints.api.IRkitSouthboundRestAPI.insertTemperature" : {
         "request" : {
           "$ref" : "PostTemperature"
         },
         "response" : {
           "$ref" : "PostTemperature"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postDoor" : {
+        "response" : {
+          "$ref" : "PostDoorResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postMessages" : {
+        "response" : {
+          "$ref" : "PostMessagesResponse"
+        }
+      },
+      "com.example.helloendpoints.api.IRkitSouthboundRestAPI.postKeys" : {
+        "response" : {
+          "$ref" : "PostKeysResponse"
         }
       }
     }
